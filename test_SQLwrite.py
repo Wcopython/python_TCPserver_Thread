@@ -12,7 +12,7 @@ class MSSQL:
         self.db=db
     def __GetConnect(self):  #得到数据库连接信息函数， 返回: conn.cursor()
         if not self.db:
-            rasie(NameError,"没有设置数据库信息")
+            raise (NameError, "没有设置数据库信息")
         self.conn=pymssql.connect(host=self.host,user=self.user,password=self.pwd,database=self.db,charset='utf8')
         cur=self.conn.cursor()  #将数据库连接信息，赋值给cur。
         if not cur:
