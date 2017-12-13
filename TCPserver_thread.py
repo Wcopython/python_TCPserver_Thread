@@ -228,8 +228,11 @@ def my_fun_work(buf,conn):
 
     #周期数据应答
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x68 and my_str2[9] == 0x06:
+        #密码验证
+        print('周期密码OK')
         my_fun_send_OK(conn)
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[9] == 0x12:
+        #
         my_fun_send_OK(conn)
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and (my_str2[9] == 0x67 or my_str2[9] == 0x68 or my_str2[9] == 0x69):
         my_fun_send_OK(conn)
