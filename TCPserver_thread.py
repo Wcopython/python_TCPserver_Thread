@@ -189,17 +189,25 @@ class AC12T:
         self.T11 = 0.0
         self.T12= 0.0
 
+
+zsqA=ZSQ()
+zsqB= ZSQ()
+zsqC = ZSQ()
+mydtu=DTU()
+ac12tA=AC12T()
+ac12tB = AC12T()
+ac12tC = AC12T()
 def my_fun_work(buf,conn):
     global  my_all_step
     global my_heart_time_count
     global  file_count
-    zsqA=ZSQ()
-    zsqB= ZSQ()
-    zsqC = ZSQ()
-    mydtu=DTU()
-    ac12tA=AC12T()
-    ac12tB = AC12T()
-    ac12tC = AC12T()
+    global zsqA
+    global zsqB
+    global zsqC
+    global mydtu
+    global ac12tA
+    global ac12tB
+    global ac12tC
     mydtuadd=0
     my_get_com_bytes=my_get_fram(buf)
 
@@ -681,7 +689,7 @@ class MyServer(socketserver.BaseRequestHandler):
 
 if __name__ == '__main__':
 
-    server = socketserver.ThreadingTCPServer(('127.0.0.1',2216),MyServer)
+    server = socketserver.ThreadingTCPServer(('106.14.41.25',2216),MyServer)
 
     server.serve_forever()
 
