@@ -3,6 +3,42 @@ import  datetime
 #多线程TCP服务器端
 import socketserver
 import pymssql
+import datetime
+
+
+def my_fun_write_recdata_tofile(mydata):
+    mytodattime = datetime.datetime.now()
+    myfilename = str(mytodattime.year) + str(mytodattime.month) + str(mytodattime.day) + '-' + str(
+        mytodattime.hour) + '-' + str(mytodattime.minute) + '-' + str(mytodattime.second)
+    myfilename = myfilename + ".bat"
+    print(myfilename)
+
+    # mydata=bytes((0x01,0x2,0x03,0x4,0x05,0x06))
+    # print(mydata)
+    myls = ''
+    my_value=list(mydata)
+    ii=0
+    while ii<len(my_value):
+        # 存储原始数据
+        y = my_value[ii]
+        myls = myls + str(y) + '\n'
+        ii = ii + 1
+
+        #直接进行转换
+        #y = (my_value[ii] + my_value(ii + 1)* 256) / 10
+        #myls = myls + str(y) + '\n'
+        #ii = ii + 2
+
+
+
+
+
+    # print(myls)
+    myfile = open(myfilename, "wt")
+    myfile.write(myls)
+    myfile.close()
+
+
 dtu_add_Low=0
 dtu_add_High=0
 def my_fun_send_OK(conn):
@@ -197,6 +233,9 @@ mydtu=DTU()
 ac12tA=AC12T()
 ac12tB = AC12T()
 ac12tC = AC12T()
+my_zsq_recdata_buf_I=[0]*2000
+my_zsq_recdata_buf_E=[0]*2000
+my_zsq_recdata_buf_pt=0
 def my_fun_work(buf,conn):
     global  my_all_step
     global my_heart_time_count
@@ -208,6 +247,7 @@ def my_fun_work(buf,conn):
     global ac12tA
     global ac12tB
     global ac12tC
+    global my_zsq_recdata_buf_pt
     mydtuadd=0
     my_get_com_bytes=my_get_fram(buf)
 
@@ -423,15 +463,38 @@ def my_fun_work(buf,conn):
         mytodattime.hour)  +":"+ str(mytodattime.minute) +":"+ str(mytodattime.second)
         print('周期计数同步值')
         #把收到的数据写入到数据库中
-        #mydtuadd,RTCtime,dtutimer,mydtu.bat_v,mydtu.bat_sun,mydtu.temperature,mydtu.shidu,
-        #zsqA.duanlu, zsqA.jiedi,zsqA.A_all,zsqA.E_fild,zsqA.Li_bat,zsqA.Sun_bat,zsqA.xian_V,zsqA.A_half,zsqA.Gan_bat,zsqA.temperature,zsqA.timer,
-        #zsqB.duanlu, zsqB.jiedi, zsqB.A_all, zsqB.E_fild, zsqB.Li_bat, zsqB.Sun_bat, zsqB.xian_V, zsqB.A_half, zsqB.Gan_bat, zsqB.temperature,zsqB.timer,
-        #zsqC.duanlu, zsqC.jiedi, zsqC.A_all, zsqC.E_fild, zsqC.Li_bat, zsqC.Sun_bat, zsqC.xian_V, zsqC.A_half, zsqC.Gan_bat,zsqC.temperature, zsqC.timer
 
         sqlstr ='insert into TB_cycdata  VALUES (1,'+"\'"+str(myservertime)+"\'"+','+str(mydtuadd)+','+"\'"+str(RTCtime)+"\'"+','+str(dtutimer)+','+str(mydtu.bat_v)+','+str(mydtu.bat_sun)+','+str(mydtu.temperature)+','+str(mydtu.shidu)+','+str(zsqA.duanlu)+','+str(zsqA.jiedi)+','+str(zsqA.A_all)+','+str(zsqA.E_fild)+','+str(zsqA.Li_bat)+','+str(zsqA.Sun_bat)+','+str(zsqA.xian_V)+','+str(zsqA.A_half)+','+str(zsqA.Gan_bat)+','+str(zsqA.temperature)+','+str(zsqA.timer)+','+str(zsqB.duanlu)+','+str(zsqB.jiedi)+','+str(zsqB.A_all)+','+str( zsqB.E_fild)+','+str(zsqB.Li_bat)+','+str(zsqB.Sun_bat)+','+str(zsqB.xian_V)+','+str(zsqB.A_half)+','+str( zsqB.Gan_bat)+','+str(zsqB.temperature)+','+str(zsqB.timer)+','+str(zsqC.duanlu)+','+str(zsqC.jiedi)+','+str(zsqC.A_all)+','+str( zsqC.E_fild)+','+str(zsqC.Li_bat)+','+str(zsqC.Sun_bat)+','+str(zsqC.xian_V)+','+str(zsqC.A_half)+','+str(zsqC.Gan_bat)+','+str(zsqC.temperature)+','+str( zsqC.timer)+')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
+
+        sqlstr = 'insert into TB_AC12T  VALUES (1,1,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(RTCtime) + "\'" + ',' + str(ac12tA.T1) + ',' + str(
+            ac12tA.T2) + ',' + str(ac12tA.T3) + ',' + str(ac12tA.T4) + ',' + str(ac12tA.T5) + ',' + str(
+            ac12tA.T6) + ',' + str(ac12tA.T7) + ',' + str(ac12tA.T8) + ',' + str(ac12tA.T9) + ',' + str(
+            ac12tA.T10) + ',' + str(ac12tA.T11) + ',' + str(ac12tA.T12)  + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+        sqlstr = 'insert into TB_AC12T  VALUES (1,2,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tB.T1) + ',' + str(
+            ac12tB.T2) + ',' + str(ac12tB.T3) + ',' + str(ac12tB.T4) + ',' + str(ac12tB.T5) + ',' + str(
+            ac12tB.T6) + ',' + str(ac12tB.T7) + ',' + str(ac12tB.T8) + ',' + str(ac12tB.T9) + ',' + str(
+            ac12tB.T10) + ',' + str(ac12tB.T11) + ',' + str(ac12tB.T12) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+        sqlstr = 'insert into TB_AC12T  VALUES (1,3,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tC.T1) + ',' + str(
+            ac12tB.T2) + ',' + str(ac12tB.T3) + ',' + str(ac12tB.T4) + ',' + str(ac12tB.T5) + ',' + str(
+            ac12tB.T6) + ',' + str(ac12tB.T7) + ',' + str(ac12tB.T8) + ',' + str(ac12tB.T9) + ',' + str(
+            ac12tB.T10) + ',' + str(ac12tB.T11) + ',' + str(ac12tB.T12) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
         my_fun_send_OK(conn)
+
+
+
     #DTU复位进程命令
     elif my_str2[0] == 0x10 and my_str2[1] == 0x00 and my_all_step == 7:
         pass
@@ -467,18 +530,58 @@ def my_fun_work(buf,conn):
         pass
         my_all_step = 0
         print("Get para finish==")
-    #文件录波数据
+
+    #文件录波数据#######################################
     elif my_str2[0] == 0x10 and my_str2[1] == 0x00 and my_all_step == 14:
         pass
         file_count=0
+        my_zsq_recdata_buf_pt=0
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73)  and my_str2[7] == 0x64 and my_str2[9] == 0x72 and my_all_step == 14:
         file_count=file_count+1
-        my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x01, 0x45,0X00,0XFF, 0x16]
+
+        ####文件写入操作
+        filelength=my_str2[16]
+        myIEadd=my_str2[12]+my_str2[13]*256
+        filenumber=my_str2[15]
+        if filenumber==1:
+            my_zsq_recdata_buf_pt=0
+        ii=0
+        while ii<filelength:
+            if myIEadd==0x4501 or  myIEadd==0x4601:
+                my_zsq_recdata_buf_I[my_zsq_recdata_buf_pt+ii]=my_str2[18+ii]
+
+            else:
+                my_zsq_recdata_buf_E[my_zsq_recdata_buf_pt+ii]=my_str2[18+ii]
+            ii=ii+1
+        my_zsq_recdata_buf_pt=my_zsq_recdata_buf_pt+filelength
+        if my_str2[17]==1:
+            print("file=%d--%X" % (my_str2[15],myIEadd))
+            print(my_zsq_recdata_buf_pt)
+            if myIEadd == 0x4501 or myIEadd == 0x4601:
+                pass
+                #print(my_zsq_recdata_buf_I)
+            else:
+                pass
+                #print(my_zsq_recdata_buf_E)
+
+        else:
+            print("fiel_end=%d--%X" % (my_str2[15],myIEadd))
+            print(my_zsq_recdata_buf_pt)
+            if myIEadd == 0x4501 or myIEadd == 0x4601:
+                #print(my_zsq_recdata_buf_I)
+                mydata=(bytes)(my_zsq_recdata_buf_I)
+                my_fun_write_recdata_tofile(mydata)
+            else:
+                #print(my_zsq_recdata_buf_E)
+                mydata = (bytes)(my_zsq_recdata_buf_E)
+                my_fun_write_recdata_tofile(mydata)
+        #文件写入操作结束
+
+
+        my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x02, 0x45,0X00,0XFF, 0x16]
         my_str_short[12] =  my_inf_add_Low
         my_str_short[13] =  my_inf_add_high
         my_str_short[14]=file_count
-
-
         my_str_short[5] = my_str_short[10] = dtu_add_Low
         my_str_short[6] = my_str_short[11] = dtu_add_High
 
@@ -497,7 +600,7 @@ def my_fun_work(buf,conn):
     #########服务器主动发送
     # 时钟同步
     my_time_adjust_status=1#1为允许此主动发送命令，0为不开启此命令
-    my_heart_cyc_time=5 #RTC时间校正对应的心跳周
+    my_heart_cyc_time=9 #RTC时间校正对应的心跳周
 
     my_call_data_stasut=0
     cyc_time=337
@@ -522,8 +625,8 @@ def my_fun_work(buf,conn):
     my_get_para_status = 0
     my_get_para_status_time = 3
 
-    my_get_file_status=0
-    my_get_file_status_time=5
+    my_get_file_status=1  #文件写入操作
+    my_get_file_status_time=2
   #RTC时间校正
     if my_heart_time_count%my_heart_cyc_time==0 and my_time_adjust_status==1:
         my_str_short = [0x68,0x11,0x11,0x68,0x53,0x01,0x00,0x67,0x01,0x06,0x01,0x00,0x00,0x00,0x8B,0xD4,0x0B,0x0F,0x05,0x07,0x0E,0x56,0x16]
@@ -651,8 +754,8 @@ def my_fun_work(buf,conn):
         my_str_to_hex_display(s3)
         my_heart_time_count=my_heart_time_count+1
         #发送获得文件命令
-    elif my_heart_time_count%my_get_para_status_time==0 and my_get_file_status==1:
-        my_str_short = [0X68,0X0B ,0X0B ,0X68 ,0X73 ,0X03 ,0X00 ,0X64 ,0X01 ,0X6D ,0X03 ,0X00 ,0X01 ,0X45 ,0X00 ,0XFF ,0X16]
+    elif my_heart_time_count%my_get_file_status_time==0 and my_get_file_status==1:
+        my_str_short = [0X68,0X0B ,0X0B ,0X68 ,0X73 ,0X03 ,0X00 ,0X64 ,0X01 ,0X6D ,0X03 ,0X00 ,0X02 ,0X45 ,0X00 ,0XFF ,0X16]
         my_str_short[5] = my_str_short[10] = dtu_add_Low
         my_str_short[6] = my_str_short[11] = dtu_add_High
         s2 = my_101_com_genert_CRC(my_str_short)
@@ -690,6 +793,7 @@ class MyServer(socketserver.BaseRequestHandler):
 if __name__ == '__main__':
 
     server = socketserver.ThreadingTCPServer(('106.14.41.25',2216),MyServer)
+    #server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
 
     server.serve_forever()
 
