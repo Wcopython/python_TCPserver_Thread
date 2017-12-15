@@ -338,15 +338,15 @@ def my_fun_work(buf,conn):
             zsqA.E_fild= (my_str2[20] + my_str2[21] * 256) / 10.0
             zsqA.Li_bat= (my_str2[23] + my_str2[24] * 256) / 10.0
 
-            zsqB.A_all = (my_str2[14] + my_str2[15] * 256) / 10.0
-            zsqB.temperature = (my_str2[17] + my_str2[18] * 256) / 10.0
-            zsqB.E_fild = (my_str2[20] + my_str2[21] * 256) / 10.0
-            zsqB.Li_bat = (my_str2[23] + my_str2[24] * 256) / 10.0
+            zsqB.A_all = (my_str2[26] + my_str2[27] * 256) / 10.0
+            zsqB.temperature = (my_str2[29] + my_str2[30] * 256) / 10.0
+            zsqB.E_fild = (my_str2[32] + my_str2[33] * 256) / 10.0
+            zsqB.Li_bat = (my_str2[35] + my_str2[36] * 256) / 10.0
 
-            zsqC.A_all = (my_str2[26] + my_str2[27] * 256) / 10.0
-            zsqC.temperature = (my_str2[29] + my_str2[30] * 256) / 10.0
-            zsqC.E_fild = (my_str2[32] + my_str2[33] * 256) / 10.0
-            zsqC.Li_bat = (my_str2[35] + my_str2[36] * 256) / 10.0
+            zsqC.A_all = (my_str2[38] + my_str2[39] * 256) / 10.0
+            zsqC.temperature = (my_str2[41] + my_str2[42] * 256) / 10.0
+            zsqC.E_fild = (my_str2[44] + my_str2[45] * 256) / 10.0
+            zsqC.Li_bat = (my_str2[47] + my_str2[48] * 256) / 10.0
             print('周期遥测数据')
         elif  my_str2[12]==0x00 and my_str2[13]==0x41:
             mydtu.bat_v=(my_str2[14]+my_str2[15]*256)/10.0
