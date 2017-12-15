@@ -792,7 +792,7 @@ class MyServer(socketserver.BaseRequestHandler):
 
 if __name__ == '__main__':
 
-    server = socketserver.ThreadingTCPServer(('106.14.41.25',2216),MyServer)
+    server = socketserver.ThreadingTCPServer(('106.14.41.25',2216),MyServer)####20171215
     #server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
 
     server.serve_forever()
