@@ -1,5 +1,5 @@
 import datetime
-import time
+
 
 def my_fun_write_recdata_tofile(mydata):
         mytodattime=datetime.datetime.now()
