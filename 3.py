@@ -4,6 +4,7 @@ import datetime
 import socketserver
 import pymssql
 import datetime
+import time
 
 
 def my_fun_write_recdata_tofile(mydata):
@@ -18,16 +19,19 @@ def my_fun_write_recdata_tofile(mydata):
     myls = ''
     my_value = list(mydata)
     ii = 0
-    while ii < len(my_value):
+    while ii < len(my_value)-2:
         # 存储原始数据
-        y = my_value[ii]
-        myls = myls + str(y) + '\n'
-        ii = ii + 1
-
-        # 直接进行转换
-        # y = (my_value[ii] + my_value(ii + 1)* 256) / 10
-        # myls = myls + str(y) + '\n'
-        # ii = ii + 2
+        if ii<=10:
+            y = my_value[ii]
+            myls = myls + str(y) + '\n'
+            ii = ii + 1
+            #print(ii)
+        else:
+            # 直接进行转换
+            y = (my_value[ii] + my_value[ii + 1]* 256) / 10.0
+            myls = myls + str(y) + '\n'
+            ii = ii + 2
+            #print(ii)
 
     # print(myls)
     myfile = open(myfilename, "wt")
@@ -91,12 +95,16 @@ def my_get_fram(s0):
             status = 0
 
         if status == 0x10:
+            if len(s2)<5:
+                break
             x = s2[my_start + 5]
             if x == 0x16:
                 s3 = s2[my_start:my_start + 6]
 
                 break
         elif status == 0x68:
+            if len(s2)<10:
+                break
             x = s2[my_start + 3]
             if x == 0x68:
                 lenth = int(s2[my_start + 1])
@@ -250,21 +258,31 @@ class DTU:
 
 class AC12T:
     def __init__(self):
-        self.T1 = 0.0
-        self.T2 = 0.0
-        self.T3 = 0.0
-        self.T4 = 0.0
-        self.T5 = 0.0
-        self.T6 = 0.0
-        self.T7 = 0.0
-        self.T8 = 0.0
-        self.T9 = 0.0
-        self.T10 = 0.0
-        self.T11 = 0.0
-        self.T12 = 0.0
+        self.T1_I = 0.0
+        self.T2_I = 0.0
+        self.T3_I = 0.0
+        self.T4_I = 0.0
+        self.T5_I = 0.0
+        self.T6_I = 0.0
+        self.T7_I = 0.0
+        self.T8_I = 0.0
+        self.T9_I = 0.0
+        self.T10_I = 0.0
+        self.T11_I = 0.0
+        self.T12_I = 0.0
 
-
-
+        self.T1_E = 0.0
+        self.T2_E = 0.0
+        self.T3_E = 0.0
+        self.T4_E = 0.0
+        self.T5_E = 0.0
+        self.T6_E = 0.0
+        self.T7_E = 0.0
+        self.T8_E = 0.0
+        self.T9_E = 0.0
+        self.T10_E = 0.0
+        self.T11_E = 0.0
+        self.T12_E = 0.0
 
 
 zsqA = ZSQ()
@@ -281,7 +299,7 @@ my_zsq_recdata_buf_I = [0] * 2000
 my_zsq_recdata_buf_E = [0] * 2000
 my_zsq_recdata_buf_pt = 0
 
-
+my_get_file_e_status=0
 
 
 
@@ -299,6 +317,9 @@ def my_fun_work(buf, conn):
     global ac12tB
     global ac12tC
     global my_zsq_recdata_buf_pt
+    global my_get_file_e_status
+    #zsqA.Li_bat=0.0
+    #zsqA.temperature=0.0
 
 
 
@@ -482,44 +503,83 @@ def my_fun_work(buf, conn):
             zsqC.A_half = (my_str2[36] + my_str2[37] * 256) / 10.0
             print('周期遥测补充')
         elif my_str2[9] == 0x68:
-            ac12tA.T1 = (my_str2[14] + my_str2[15] * 256) / 10.0
-            ac12tA.T2 = (my_str2[16] + my_str2[17] * 256) / 10.0
-            ac12tA.T3 = (my_str2[18] + my_str2[19] * 256) / 10.0
-            ac12tA.T4 = (my_str2[20] + my_str2[21] * 256) / 10.0
-            ac12tA.T5 = (my_str2[22] + my_str2[23] * 256) / 10.0
-            ac12tA.T6 = (my_str2[24] + my_str2[25] * 256) / 10.0
-            ac12tA.T7 = (my_str2[26] + my_str2[27] * 256) / 10.0
-            ac12tA.T8 = (my_str2[28] + my_str2[29] * 256) / 10.0
-            ac12tA.T9 = (my_str2[30] + my_str2[31] * 256) / 10.0
-            ac12tA.T10 = (my_str2[32] + my_str2[33] * 256) / 10.0
-            ac12tA.T11 = (my_str2[34] + my_str2[35] * 256) / 10.0
-            ac12tA.T12 = (my_str2[36] + my_str2[37] * 256) / 10.0
+            ac12tA.T1_I = (my_str2[14] + my_str2[15] * 256) / 10.0
+            ac12tA.T2_I = (my_str2[16] + my_str2[17] * 256) / 10.0
+            ac12tA.T3_I = (my_str2[18] + my_str2[19] * 256) / 10.0
+            ac12tA.T4_I = (my_str2[20] + my_str2[21] * 256) / 10.0
+            ac12tA.T5_I = (my_str2[22] + my_str2[23] * 256) / 10.0
+            ac12tA.T6_I = (my_str2[24] + my_str2[25] * 256) / 10.0
+            ac12tA.T7_I = (my_str2[26] + my_str2[27] * 256) / 10.0
+            ac12tA.T8_I = (my_str2[28] + my_str2[29] * 256) / 10.0
+            ac12tA.T9_I = (my_str2[30] + my_str2[31] * 256) / 10.0
+            ac12tA.T10_I = (my_str2[32] + my_str2[33] * 256) / 10.0
+            ac12tA.T11_I = (my_str2[34] + my_str2[35] * 256) / 10.0
+            ac12tA.T12_I = (my_str2[36] + my_str2[37] * 256) / 10.0
 
-            ac12tB.T1 = (my_str2[38] + my_str2[39] * 256) / 10.0
-            ac12tB.T2 = (my_str2[40] + my_str2[41] * 256) / 10.0
-            ac12tB.T3 = (my_str2[42] + my_str2[43] * 256) / 10.0
-            ac12tB.T4 = (my_str2[44] + my_str2[45] * 256) / 10.0
-            ac12tB.T5 = (my_str2[46] + my_str2[47] * 256) / 10.0
-            ac12tB.T6 = (my_str2[48] + my_str2[49] * 256) / 10.0
-            ac12tB.T7 = (my_str2[50] + my_str2[51] * 256) / 10.0
-            ac12tB.T8 = (my_str2[52] + my_str2[53] * 256) / 10.0
-            ac12tB.T9 = (my_str2[54] + my_str2[55] * 256) / 10.0
-            ac12tB.T10 = (my_str2[56] + my_str2[57] * 256) / 10.0
-            ac12tB.T11 = (my_str2[58] + my_str2[59] * 256) / 10.0
-            ac12tB.T12 = (my_str2[60] + my_str2[61] * 256) / 10.0
+            ac12tA.T1_E = (my_str2[38] + my_str2[39] * 256) / 10.0
+            ac12tA.T2_E = (my_str2[40] + my_str2[41] * 256) / 10.0
+            ac12tA.T3_E = (my_str2[42] + my_str2[43] * 256) / 10.0
+            ac12tA.T4_E = (my_str2[44] + my_str2[45] * 256) / 10.0
+            ac12tA.T5_E = (my_str2[46] + my_str2[47] * 256) / 10.0
+            ac12tA.T6_E = (my_str2[48] + my_str2[49] * 256) / 10.0
+            ac12tA.T7_E = (my_str2[50] + my_str2[51] * 256) / 10.0
+            ac12tA.T8_E = (my_str2[52] + my_str2[53] * 256) / 10.0
+            ac12tA.T9_E = (my_str2[54] + my_str2[55] * 256) / 10.0
+            ac12tA.T10_E = (my_str2[56] + my_str2[57] * 256) / 10.0
+            ac12tA.T11_E = (my_str2[58] + my_str2[59] * 256) / 10.0
+            ac12tA.T12_E = (my_str2[60] + my_str2[61] * 256) / 10.0
 
-            ac12tC.T1 = (my_str2[62] + my_str2[63] * 256) / 10.0
-            ac12tC.T2 = (my_str2[64] + my_str2[65] * 256) / 10.0
-            ac12tC.T3 = (my_str2[66] + my_str2[67] * 256) / 10.0
-            ac12tC.T4 = (my_str2[68] + my_str2[69] * 256) / 10.0
-            ac12tC.T5 = (my_str2[70] + my_str2[71] * 256) / 10.0
-            ac12tC.T6 = (my_str2[72] + my_str2[73] * 256) / 10.0
-            ac12tC.T7 = (my_str2[74] + my_str2[75] * 256) / 10.0
-            ac12tC.T8 = (my_str2[76] + my_str2[77] * 256) / 10.0
-            ac12tC.T9 = (my_str2[78] + my_str2[79] * 256) / 10.0
-            ac12tC.T10 = (my_str2[80] + my_str2[81] * 256) / 10.0
-            ac12tC.T11 = (my_str2[82] + my_str2[83] * 256) / 10.0
-            ac12tC.T12 = (my_str2[84] + my_str2[85] * 256) / 10.0
+            ac12tB.T1_I = (my_str2[62] + my_str2[63] * 256) / 10.0
+            ac12tB.T2_I = (my_str2[64] + my_str2[65] * 256) / 10.0
+            ac12tB.T3_I = (my_str2[66] + my_str2[67] * 256) / 10.0
+            ac12tB.T4_I = (my_str2[68] + my_str2[69] * 256) / 10.0
+            ac12tB.T5_I = (my_str2[70] + my_str2[71] * 256) / 10.0
+            ac12tB.T6_I = (my_str2[72] + my_str2[73] * 256) / 10.0
+            ac12tB.T7_I = (my_str2[74] + my_str2[75] * 256) / 10.0
+            ac12tB.T8_I = (my_str2[76] + my_str2[77] * 256) / 10.0
+            ac12tB.T9_I = (my_str2[78] + my_str2[79] * 256) / 10.0
+            ac12tB.T10_I = (my_str2[80] + my_str2[81] * 256) / 10.0
+            ac12tB.T11_I = (my_str2[82] + my_str2[83] * 256) / 10.0
+            ac12tB.T12_I = (my_str2[84] + my_str2[85] * 256) / 10.0
+
+            ac12tB.T1_E = (my_str2[86] + my_str2[87] * 256) / 10.0
+            ac12tB.T2_E = (my_str2[88] + my_str2[89] * 256) / 10.0
+            ac12tB.T3_E = (my_str2[90] + my_str2[91] * 256) / 10.0
+            ac12tB.T4_E = (my_str2[92] + my_str2[93] * 256) / 10.0
+            ac12tB.T5_E = (my_str2[94] + my_str2[95] * 256) / 10.0
+            ac12tB.T6_E = (my_str2[96] + my_str2[97] * 256) / 10.0
+            ac12tB.T7_E = (my_str2[98] + my_str2[99] * 256) / 10.0
+            ac12tB.T8_E = (my_str2[100] + my_str2[101] * 256) / 10.0
+            ac12tB.T9_E = (my_str2[102] + my_str2[103] * 256) / 10.0
+            ac12tB.T10_E = (my_str2[104] + my_str2[105] * 256) / 10.0
+            ac12tB.T11_E = (my_str2[106] + my_str2[107] * 256) / 10.0
+            ac12tB.T12_E = (my_str2[108] + my_str2[109] * 256) / 10.0
+
+            ac12tC.T1_I = (my_str2[110] + my_str2[111] * 256) / 10.0
+            ac12tC.T2_I = (my_str2[112] + my_str2[113] * 256) / 10.0
+            ac12tC.T3_I = (my_str2[114] + my_str2[115] * 256) / 10.0
+            ac12tC.T4_I = (my_str2[116] + my_str2[117] * 256) / 10.0
+            ac12tC.T5_I = (my_str2[118] + my_str2[119] * 256) / 10.0
+            ac12tC.T6_I = (my_str2[120] + my_str2[121] * 256) / 10.0
+            ac12tC.T7_I = (my_str2[122] + my_str2[123] * 256) / 10.0
+            ac12tC.T8_I = (my_str2[124] + my_str2[125] * 256) / 10.0
+            ac12tC.T9_I = (my_str2[126] + my_str2[127] * 256) / 10.0
+            ac12tC.T10_I = (my_str2[128] + my_str2[129] * 256) / 10.0
+            ac12tC.T11_I = (my_str2[130] + my_str2[131] * 256) / 10.0
+            ac12tC.T12_I = (my_str2[132] + my_str2[133] * 256) / 10.0
+
+            ac12tC.T1_E = (my_str2[134] + my_str2[135] * 256) / 10.0
+            ac12tC.T2_E = (my_str2[136] + my_str2[137] * 256) / 10.0
+            ac12tC.T3_E = (my_str2[138] + my_str2[139] * 256) / 10.0
+            ac12tC.T4_E = (my_str2[140] + my_str2[141] * 256) / 10.0
+            ac12tC.T5_E = (my_str2[142] + my_str2[143] * 256) / 10.0
+            ac12tC.T6_E = (my_str2[144] + my_str2[145] * 256) / 10.0
+            ac12tC.T7_E = (my_str2[146] + my_str2[147] * 256) / 10.0
+            ac12tC.T8_E = (my_str2[148] + my_str2[149] * 256) / 10.0
+            ac12tC.T9_E = (my_str2[150] + my_str2[151] * 256) / 10.0
+            ac12tC.T10_E = (my_str2[152] + my_str2[153] * 256) / 10.0
+            ac12tC.T11_E = (my_str2[154] + my_str2[155] * 256) / 10.0
+            ac12tC.T12_E = (my_str2[156] + my_str2[157] * 256) / 10.0
             print('周期遥测12T')
         my_fun_send_OK(conn)
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0xDC and my_str2[
@@ -544,31 +604,59 @@ def my_fun_work(buf, conn):
             zsqB.xian_V) + ',' + str(zsqB.A_half) + ',' + str(zsqB.Gan_bat) + ',' + str(zsqB.temperature) + ',' + str(
             zsqB.timer) + ',' + str(zsqC.duanlu) + ',' + str(zsqC.jiedi) + ',' + str(zsqC.A_all) + ',' + str(
             zsqC.E_fild) + ',' + str(zsqC.Li_bat) + ',' + str(zsqC.Sun_bat) + ',' + str(zsqC.xian_V) + ',' + str(
-            zsqC.A_half) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer) + ')'
+            zsqC.A_half) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer) +',0,0'+ ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,1,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
-            RTCtime) + "\'" + ',' + str(ac12tA.T1) + ',' + str(
-            ac12tA.T2) + ',' + str(ac12tA.T3) + ',' + str(ac12tA.T4) + ',' + str(ac12tA.T5) + ',' + str(
-            ac12tA.T6) + ',' + str(ac12tA.T7) + ',' + str(ac12tA.T8) + ',' + str(ac12tA.T9) + ',' + str(
-            ac12tA.T10) + ',' + str(ac12tA.T11) + ',' + str(ac12tA.T12) + ')'
+        sqlstr = 'insert into TB_AC12T  VALUES (1,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tA.T1_I) + ',' + str(
+            ac12tA.T2_I) + ',' + str(ac12tA.T3_I) + ',' + str(ac12tA.T4_I) + ',' + str(ac12tA.T5_I) + ',' + str(
+            ac12tA.T6_I) + ',' + str(ac12tA.T7_I) + ',' + str(ac12tA.T8_I) + ',' + str(ac12tA.T9_I) + ',' + str(
+            ac12tA.T10_I) + ',' + str(ac12tA.T11_I) + ',' + str(ac12tA.T12_I) + ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,2,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
-            RTCtime) + "\'" + ',' + str(ac12tB.T1) + ',' + str(
-            ac12tB.T2) + ',' + str(ac12tB.T3) + ',' + str(ac12tB.T4) + ',' + str(ac12tB.T5) + ',' + str(
-            ac12tB.T6) + ',' + str(ac12tB.T7) + ',' + str(ac12tB.T8) + ',' + str(ac12tB.T9) + ',' + str(
-            ac12tB.T10) + ',' + str(ac12tB.T11) + ',' + str(ac12tB.T12) + ')'
+        sqlstr = 'insert into TB_AC12T  VALUES (1,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tB.T1_I) + ',' + str(
+            ac12tB.T2_I) + ',' + str(ac12tB.T3_I) + ',' + str(ac12tB.T4_I) + ',' + str(ac12tB.T5_I) + ',' + str(
+            ac12tB.T6_I) + ',' + str(ac12tB.T7_I) + ',' + str(ac12tB.T8_I) + ',' + str(ac12tB.T9_I) + ',' + str(
+            ac12tB.T10_I) + ',' + str(ac12tB.T11_I) + ',' + str(ac12tB.T12_I) + ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,3,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
-            RTCtime) + "\'" + ',' + str(ac12tC.T1) + ',' + str(
-            ac12tB.T2) + ',' + str(ac12tB.T3) + ',' + str(ac12tB.T4) + ',' + str(ac12tB.T5) + ',' + str(
-            ac12tB.T6) + ',' + str(ac12tB.T7) + ',' + str(ac12tB.T8) + ',' + str(ac12tB.T9) + ',' + str(
-            ac12tB.T10) + ',' + str(ac12tB.T11) + ',' + str(ac12tB.T12) + ')'
+        sqlstr = 'insert into TB_AC12T  VALUES (1,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tC.T1_I) + ',' + str(
+            ac12tC.T2_I) + ',' + str(ac12tC.T3_I) + ',' + str(ac12tC.T4_I) + ',' + str(ac12tC.T5_I) + ',' + str(
+            ac12tC.T6_I) + ',' + str(ac12tC.T7_I) + ',' + str(ac12tC.T8_I) + ',' + str(ac12tC.T9_I) + ',' + str(
+            ac12tC.T10_I) + ',' + str(ac12tC.T11_I) + ',' + str(ac12tC.T12_I) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+        sqlstr = 'insert into TB_AC12T  VALUES (1,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tA.T1_E) + ',' + str(
+            ac12tA.T2_E) + ',' + str(ac12tA.T3_E) + ',' + str(ac12tA.T4_E) + ',' + str(ac12tA.T5_E) + ',' + str(
+            ac12tA.T6_E) + ',' + str(ac12tA.T7_E) + ',' + str(ac12tA.T8_E) + ',' + str(ac12tA.T9_E) + ',' + str(
+            ac12tA.T10_E) + ',' + str(ac12tA.T11_E) + ',' + str(ac12tA.T12_E) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+
+
+        sqlstr = 'insert into TB_AC12T  VALUES (1,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tB.T1_E) + ',' + str(
+            ac12tB.T2_E) + ',' + str(ac12tB.T3_E) + ',' + str(ac12tB.T4_E) + ',' + str(ac12tB.T5_E) + ',' + str(
+            ac12tB.T6_E) + ',' + str(ac12tB.T7_E) + ',' + str(ac12tB.T8_E) + ',' + str(ac12tB.T9_E) + ',' + str(
+            ac12tB.T10_E) + ',' + str(ac12tB.T11_E) + ',' + str(ac12tB.T12_E) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+
+
+        sqlstr = 'insert into TB_AC12T  VALUES (1,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tC.T1_E) + ',' + str(
+            ac12tC.T2_E) + ',' + str(ac12tC.T3_E) + ',' + str(ac12tC.T4_E) + ',' + str(ac12tC.T5_E) + ',' + str(
+            ac12tC.T6_E) + ',' + str(ac12tC.T7_E) + ',' + str(ac12tC.T8_E) + ',' + str(ac12tC.T9_E) + ',' + str(
+            ac12tC.T10_E) + ',' + str(ac12tC.T11_E) + ',' + str(ac12tC.T12_E) + ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
@@ -576,12 +664,14 @@ def my_fun_work(buf, conn):
     #######################################3
     # 报警数据处理
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x01 and my_str2[9] == 0x03:
-        zsqinf = ((my_str2[12]-1)//2)
-        zsqX.alarmid=zsqinf
-        if my_str2[12]%2==1:
+        zsqinf = ((my_str2[12])//2)
+        zsqX.alarmid=zsqinf+1
+        if my_str2[12]%2==0:
             zsqX.duanlu=my_str2[14]
+            zsqX.jiedi=0
         else:
             zsqX.jiedi=my_str2[14]
+            zsqX.duanlu=0
         my_fun_send_OK(conn)
         print("报警-遥信无时标")
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x1E and my_str2[9] == 0x03:
@@ -589,53 +679,95 @@ def my_fun_work(buf, conn):
         my_fun_send_OK(conn)
         print("报警-遥信有时标")
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[9] == 0x6A:
-        zsqX.A_I = my_str2[14]+my_str2[15]*256/10.0
-        zsqX.A_E = my_str2[16] + my_str2[17] * 256/10.0
-        zsqX.B_I = my_str2[18] + my_str2[19] * 256/10.0
-        zsqX.B_E = my_str2[20] + my_str2[21] * 256/10.0
-        zsqX.C_I = my_str2[22] + my_str2[23] * 256/10.0
-        zsqX.C_E = my_str2[24] + my_str2[25] * 256/10.0
+        zsqX.A_I =(my_str2[14]+my_str2[15]*256)/10.0
+        zsqX.A_E =(my_str2[16] + my_str2[17] * 256)/10.0
+        zsqX.A_half_I=(my_str2[18] + my_str2[19] * 256)/10.0
+        zsqX.B_I = (my_str2[20] + my_str2[21] * 256) / 10.0
+        zsqX.B_E = (my_str2[22] + my_str2[23] * 256) / 10.0
+        zsqX.B_half_I = (my_str2[24] + my_str2[25] * 256) / 10.0
+        zsqX.C_I = (my_str2[26] + my_str2[27] * 256) / 10.0
+        zsqX.C_E = (my_str2[28] + my_str2[29] * 256) / 10.0
+        zsqX.C_half_I = (my_str2[30] + my_str2[31] * 256) / 10.0
         my_fun_send_OK(conn)
         print("报警-遥测AC")
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[9] == 0x6B:
-        ac12tA.T1 = (my_str2[14] + my_str2[15] * 256) / 10.0
-        ac12tA.T2 = (my_str2[16] + my_str2[17] * 256) / 10.0
-        ac12tA.T3 = (my_str2[18] + my_str2[19] * 256) / 10.0
-        ac12tA.T4 = (my_str2[20] + my_str2[21] * 256) / 10.0
-        ac12tA.T5 = (my_str2[22] + my_str2[23] * 256) / 10.0
-        ac12tA.T6 = (my_str2[24] + my_str2[25] * 256) / 10.0
-        ac12tA.T7 = (my_str2[26] + my_str2[27] * 256) / 10.0
-        ac12tA.T8 = (my_str2[28] + my_str2[29] * 256) / 10.0
-        ac12tA.T9 = (my_str2[30] + my_str2[31] * 256) / 10.0
-        ac12tA.T10 = (my_str2[32] + my_str2[33] * 256) / 10.0
-        ac12tA.T11 = (my_str2[34] + my_str2[35] * 256) / 10.0
-        ac12tA.T12 = (my_str2[36] + my_str2[37] * 256) / 10.0
+        ac12tA.T1_I = (my_str2[14] + my_str2[15] * 256) / 10.0
+        ac12tA.T2_I = (my_str2[16] + my_str2[17] * 256) / 10.0
+        ac12tA.T3_I = (my_str2[18] + my_str2[19] * 256) / 10.0
+        ac12tA.T4_I = (my_str2[20] + my_str2[21] * 256) / 10.0
+        ac12tA.T5_I = (my_str2[22] + my_str2[23] * 256) / 10.0
+        ac12tA.T6_I = (my_str2[24] + my_str2[25] * 256) / 10.0
+        ac12tA.T7_I = (my_str2[26] + my_str2[27] * 256) / 10.0
+        ac12tA.T8_I = (my_str2[28] + my_str2[29] * 256) / 10.0
+        ac12tA.T9_I = (my_str2[30] + my_str2[31] * 256) / 10.0
+        ac12tA.T10_I = (my_str2[32] + my_str2[33] * 256) / 10.0
+        ac12tA.T11_I = (my_str2[34] + my_str2[35] * 256) / 10.0
+        ac12tA.T12_I = (my_str2[36] + my_str2[37] * 256) / 10.0
 
-        ac12tB.T1 = (my_str2[38] + my_str2[39] * 256) / 10.0
-        ac12tB.T2 = (my_str2[40] + my_str2[41] * 256) / 10.0
-        ac12tB.T3 = (my_str2[42] + my_str2[43] * 256) / 10.0
-        ac12tB.T4 = (my_str2[44] + my_str2[45] * 256) / 10.0
-        ac12tB.T5 = (my_str2[46] + my_str2[47] * 256) / 10.0
-        ac12tB.T6 = (my_str2[48] + my_str2[49] * 256) / 10.0
-        ac12tB.T7 = (my_str2[50] + my_str2[51] * 256) / 10.0
-        ac12tB.T8 = (my_str2[52] + my_str2[53] * 256) / 10.0
-        ac12tB.T9 = (my_str2[54] + my_str2[55] * 256) / 10.0
-        ac12tB.T10 = (my_str2[56] + my_str2[57] * 256) / 10.0
-        ac12tB.T11 = (my_str2[58] + my_str2[59] * 256) / 10.0
-        ac12tB.T12 = (my_str2[60] + my_str2[61] * 256) / 10.0
+        ac12tA.T1_E = (my_str2[38] + my_str2[39] * 256) / 10.0
+        ac12tA.T2_E = (my_str2[40] + my_str2[41] * 256) / 10.0
+        ac12tA.T3_E = (my_str2[42] + my_str2[43] * 256) / 10.0
+        ac12tA.T4_E = (my_str2[44] + my_str2[45] * 256) / 10.0
+        ac12tA.T5_E = (my_str2[46] + my_str2[47] * 256) / 10.0
+        ac12tA.T6_E = (my_str2[48] + my_str2[49] * 256) / 10.0
+        ac12tA.T7_E = (my_str2[50] + my_str2[51] * 256) / 10.0
+        ac12tA.T8_E = (my_str2[52] + my_str2[53] * 256) / 10.0
+        ac12tA.T9_E = (my_str2[54] + my_str2[55] * 256) / 10.0
+        ac12tA.T10_E = (my_str2[56] + my_str2[57] * 256) / 10.0
+        ac12tA.T11_E = (my_str2[58] + my_str2[59] * 256) / 10.0
+        ac12tA.T12_E = (my_str2[60] + my_str2[61] * 256) / 10.0
 
-        ac12tC.T1 = (my_str2[62] + my_str2[63] * 256) / 10.0
-        ac12tC.T2 = (my_str2[64] + my_str2[65] * 256) / 10.0
-        ac12tC.T3 = (my_str2[66] + my_str2[67] * 256) / 10.0
-        ac12tC.T4 = (my_str2[68] + my_str2[69] * 256) / 10.0
-        ac12tC.T5 = (my_str2[70] + my_str2[71] * 256) / 10.0
-        ac12tC.T6 = (my_str2[72] + my_str2[73] * 256) / 10.0
-        ac12tC.T7 = (my_str2[74] + my_str2[75] * 256) / 10.0
-        ac12tC.T8 = (my_str2[76] + my_str2[77] * 256) / 10.0
-        ac12tC.T9 = (my_str2[78] + my_str2[79] * 256) / 10.0
-        ac12tC.T10 = (my_str2[80] + my_str2[81] * 256) / 10.0
-        ac12tC.T11 = (my_str2[82] + my_str2[83] * 256) / 10.0
-        ac12tC.T12 = (my_str2[84] + my_str2[85] * 256) / 10.0
+        ac12tB.T1_I = (my_str2[62] + my_str2[63] * 256) / 10.0
+        ac12tB.T2_I = (my_str2[64] + my_str2[65] * 256) / 10.0
+        ac12tB.T3_I = (my_str2[66] + my_str2[67] * 256) / 10.0
+        ac12tB.T4_I = (my_str2[68] + my_str2[69] * 256) / 10.0
+        ac12tB.T5_I = (my_str2[70] + my_str2[71] * 256) / 10.0
+        ac12tB.T6_I = (my_str2[72] + my_str2[73] * 256) / 10.0
+        ac12tB.T7_I = (my_str2[74] + my_str2[75] * 256) / 10.0
+        ac12tB.T8_I = (my_str2[76] + my_str2[77] * 256) / 10.0
+        ac12tB.T9_I = (my_str2[78] + my_str2[79] * 256) / 10.0
+        ac12tB.T10_I = (my_str2[80] + my_str2[81] * 256) / 10.0
+        ac12tB.T11_I = (my_str2[82] + my_str2[83] * 256) / 10.0
+        ac12tB.T12_I = (my_str2[84] + my_str2[85] * 256) / 10.0
+
+        ac12tB.T1_E = (my_str2[86] + my_str2[87] * 256) / 10.0
+        ac12tB.T2_E = (my_str2[88] + my_str2[89] * 256) / 10.0
+        ac12tB.T3_E = (my_str2[90] + my_str2[91] * 256) / 10.0
+        ac12tB.T4_E = (my_str2[92] + my_str2[93] * 256) / 10.0
+        ac12tB.T5_E = (my_str2[94] + my_str2[95] * 256) / 10.0
+        ac12tB.T6_E = (my_str2[96] + my_str2[97] * 256) / 10.0
+        ac12tB.T7_E = (my_str2[98] + my_str2[99] * 256) / 10.0
+        ac12tB.T8_E = (my_str2[100] + my_str2[101] * 256) / 10.0
+        ac12tB.T9_E = (my_str2[102] + my_str2[103] * 256) / 10.0
+        ac12tB.T10_E = (my_str2[104] + my_str2[105] * 256) / 10.0
+        ac12tB.T11_E = (my_str2[106] + my_str2[107] * 256) / 10.0
+        ac12tB.T12_E = (my_str2[108] + my_str2[109] * 256) / 10.0
+
+        ac12tC.T1_I = (my_str2[110] + my_str2[111] * 256) / 10.0
+        ac12tC.T2_I = (my_str2[112] + my_str2[113] * 256) / 10.0
+        ac12tC.T3_I = (my_str2[114] + my_str2[115] * 256) / 10.0
+        ac12tC.T4_I = (my_str2[116] + my_str2[117] * 256) / 10.0
+        ac12tC.T5_I = (my_str2[118] + my_str2[119] * 256) / 10.0
+        ac12tC.T6_I = (my_str2[120] + my_str2[121] * 256) / 10.0
+        ac12tC.T7_I = (my_str2[122] + my_str2[123] * 256) / 10.0
+        ac12tC.T8_I = (my_str2[124] + my_str2[125] * 256) / 10.0
+        ac12tC.T9_I = (my_str2[126] + my_str2[127] * 256) / 10.0
+        ac12tC.T10_I = (my_str2[128] + my_str2[129] * 256) / 10.0
+        ac12tC.T11_I = (my_str2[130] + my_str2[131] * 256) / 10.0
+        ac12tC.T12_I = (my_str2[132] + my_str2[133] * 256) / 10.0
+
+        ac12tC.T1_E = (my_str2[134] + my_str2[135] * 256) / 10.0
+        ac12tC.T2_E = (my_str2[136] + my_str2[137] * 256) / 10.0
+        ac12tC.T3_E = (my_str2[138] + my_str2[139] * 256) / 10.0
+        ac12tC.T4_E = (my_str2[140] + my_str2[141] * 256) / 10.0
+        ac12tC.T5_E = (my_str2[142] + my_str2[143] * 256) / 10.0
+        ac12tC.T6_E = (my_str2[144] + my_str2[145] * 256) / 10.0
+        ac12tC.T7_E = (my_str2[146] + my_str2[147] * 256) / 10.0
+        ac12tC.T8_E = (my_str2[148] + my_str2[149] * 256) / 10.0
+        ac12tC.T9_E = (my_str2[150] + my_str2[151] * 256) / 10.0
+        ac12tC.T10_E = (my_str2[152] + my_str2[153] * 256) / 10.0
+        ac12tC.T11_E = (my_str2[154] + my_str2[155] * 256) / 10.0
+        ac12tC.T12_E = (my_str2[156] + my_str2[157] * 256) / 10.0
         my_fun_send_OK(conn)
         print("报警-遥测12T")
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0xDC and my_str2[9] == 0x6C:
@@ -649,7 +781,7 @@ def my_fun_work(buf, conn):
         print('报警-计数同步值')
         # 把收到的数据写入到数据库中
 
-        if zsqX.alarmid==0:
+        if zsqX.alarmid==1:
             sqlstr = 'insert into TB_cycdata  VALUES (2,' + "\'" + str(myservertime) + "\'" + ',' + str(
                 mydtuadd) + ',' + "\'" + str(RTCtime) + "\'" + ',' + str(dtutimer) + ',' + str(mydtu.bat_v) + ',' + str(
                 mydtu.bat_sun) + ',' + str(mydtu.temperature) + ',' + str(mydtu.shidu) + ',' + str(zsqX.duanlu) + ',' + str(
@@ -661,7 +793,7 @@ def my_fun_work(buf, conn):
                 zsqB.timer) + ',' + str(zsqC.duanlu) + ',' + str(zsqC.jiedi) + ',' + str(zsqX.C_I) + ',' + str(
                 zsqX.C_E) + ',' + str(zsqC.Li_bat) + ',' + str(zsqC.Sun_bat) + ',' + str(zsqC.xian_V) + ',' + str(
                 zsqX.C_half_I) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer)+',' + str(zsqX.alarmid)+','+"\'"+str(zsqX.RTCtime)+"\'"+')'
-        elif zsqX.alarmid==1:
+        elif zsqX.alarmid==2:
             sqlstr = 'insert into TB_cycdata  VALUES (2,' + "\'" + str(myservertime) + "\'" + ',' + str(
                 mydtuadd) + ',' + "\'" + str(RTCtime) + "\'" + ',' + str(dtutimer) + ',' + str(mydtu.bat_v) + ',' + str(
                 mydtu.bat_sun) + ',' + str(mydtu.temperature) + ',' + str(mydtu.shidu) + ',' + str(
@@ -692,32 +824,74 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,1,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
-            RTCtime) + "\'" + ',' + str(ac12tA.T1) + ',' + str(
-            ac12tA.T2) + ',' + str(ac12tA.T3) + ',' + str(ac12tA.T4) + ',' + str(ac12tA.T5) + ',' + str(
-            ac12tA.T6) + ',' + str(ac12tA.T7) + ',' + str(ac12tA.T8) + ',' + str(ac12tA.T9) + ',' + str(
-            ac12tA.T10) + ',' + str(ac12tA.T11) + ',' + str(ac12tA.T12) + ')'
+        sqlstr = 'insert into TB_AC12T  VALUES (2,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tA.T1_I) + ',' + str(
+            ac12tA.T2_I) + ',' + str(ac12tA.T3_I) + ',' + str(ac12tA.T4_I) + ',' + str(ac12tA.T5_I) + ',' + str(
+            ac12tA.T6_I) + ',' + str(ac12tA.T7_I) + ',' + str(ac12tA.T8_I) + ',' + str(ac12tA.T9_I) + ',' + str(
+            ac12tA.T10_I) + ',' + str(ac12tA.T11_I) + ',' + str(ac12tA.T12_I) + ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,2,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
-            RTCtime) + "\'" + ',' + str(ac12tB.T1) + ',' + str(
-            ac12tB.T2) + ',' + str(ac12tB.T3) + ',' + str(ac12tB.T4) + ',' + str(ac12tB.T5) + ',' + str(
-            ac12tB.T6) + ',' + str(ac12tB.T7) + ',' + str(ac12tB.T8) + ',' + str(ac12tB.T9) + ',' + str(
-            ac12tB.T10) + ',' + str(ac12tB.T11) + ',' + str(ac12tB.T12) + ')'
+
+
+        sqlstr = 'insert into TB_AC12T  VALUES (2,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tB.T1_I) + ',' + str(
+            ac12tB.T2_I) + ',' + str(ac12tB.T3_I) + ',' + str(ac12tB.T4_I) + ',' + str(ac12tB.T5_I) + ',' + str(
+            ac12tB.T6_I) + ',' + str(ac12tB.T7_I) + ',' + str(ac12tB.T8_I) + ',' + str(ac12tB.T9_I) + ',' + str(
+            ac12tB.T10_I) + ',' + str(ac12tB.T11_I) + ',' + str(ac12tB.T12_I) + ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,3,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
-            RTCtime) + "\'" + ',' + str(ac12tC.T1) + ',' + str(
-            ac12tB.T2) + ',' + str(ac12tB.T3) + ',' + str(ac12tB.T4) + ',' + str(ac12tB.T5) + ',' + str(
-            ac12tB.T6) + ',' + str(ac12tB.T7) + ',' + str(ac12tB.T8) + ',' + str(ac12tB.T9) + ',' + str(
-            ac12tB.T10) + ',' + str(ac12tB.T11) + ',' + str(ac12tB.T12) + ')'
+        sqlstr = 'insert into TB_AC12T  VALUES (2,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tC.T1_I) + ',' + str(
+            ac12tC.T2_I) + ',' + str(ac12tC.T3_I) + ',' + str(ac12tC.T4_I) + ',' + str(ac12tC.T5_I) + ',' + str(
+            ac12tC.T6_I) + ',' + str(ac12tC.T7_I) + ',' + str(ac12tC.T8_I) + ',' + str(ac12tC.T9_I) + ',' + str(
+            ac12tC.T10_I) + ',' + str(ac12tC.T11_I) + ',' + str(ac12tC.T12_I) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+        sqlstr = 'insert into TB_AC12T  VALUES (2,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tA.T1_E) + ',' + str(
+            ac12tA.T2_E) + ',' + str(ac12tA.T3_E) + ',' + str(ac12tA.T4_E) + ',' + str(ac12tA.T5_E) + ',' + str(
+            ac12tA.T6_E) + ',' + str(ac12tA.T7_E) + ',' + str(ac12tA.T8_E) + ',' + str(ac12tA.T9_E) + ',' + str(
+            ac12tA.T10_E) + ',' + str(ac12tA.T11_E) + ',' + str(ac12tA.T12_E) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+        sqlstr = 'insert into TB_AC12T  VALUES (2,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tB.T1_E) + ',' + str(
+            ac12tB.T2_E) + ',' + str(ac12tB.T3_E) + ',' + str(ac12tB.T4_E) + ',' + str(ac12tB.T5_E) + ',' + str(
+            ac12tB.T6_E) + ',' + str(ac12tB.T7_E) + ',' + str(ac12tB.T8_E) + ',' + str(ac12tB.T9_E) + ',' + str(
+            ac12tB.T10_E) + ',' + str(ac12tB.T11_E) + ',' + str(ac12tB.T12_E) + ')'
+        print(sqlstr)
+        my_fun_SQL_insertdata(sqlstr)
+
+
+
+        sqlstr = 'insert into TB_AC12T  VALUES (2,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+            RTCtime) + "\'" + ',' + str(ac12tC.T1_E) + ',' + str(
+            ac12tC.T2_E) + ',' + str(ac12tC.T3_E) + ',' + str(ac12tC.T4_E) + ',' + str(ac12tC.T5_E) + ',' + str(
+            ac12tC.T6_E) + ',' + str(ac12tC.T7_E) + ',' + str(ac12tC.T8_E) + ',' + str(ac12tC.T9_E) + ',' + str(
+            ac12tC.T10_E) + ',' + str(ac12tC.T11_E) + ',' + str(ac12tC.T12_E) + ')'
 
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
         my_fun_send_OK(conn)
+        #总召录波文件
+        time.sleep(1)
+        my_str_short = [0X68, 0X0B, 0X0B, 0X68, 0X73, 0X03, 0X00, 0X64, 0X01, 0X6D, 0X03, 0X00, 0X01, 0X45, 0X00, 0XFF,0X16]
+        my_str_short[5] = my_str_short[10] = dtu_add_Low
+        my_str_short[6] = my_str_short[11] = dtu_add_High
+        s2 = my_101_com_genert_CRC(my_str_short)
+        s3 = bytes(s2)
+        conn.send(s3)
+        my_all_step = 14
+
+        print("alarm Get File send data_I:", end='')
+        my_str_to_hex_display(s3)
+        my_get_file_e_status=1
+
 
 
 
@@ -813,11 +987,12 @@ def my_fun_work(buf, conn):
                 # print(my_zsq_recdata_buf_E)
                 mydata = (bytes)(my_zsq_recdata_buf_E)
                 my_fun_write_recdata_tofile(mydata)
+
         # 文件写入操作结束
-
-
-        my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x02, 0x45, 0X00, 0XFF,
-                        0x16]
+        if my_get_file_e_status==1:
+            my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x01, 0x45, 0X00, 0XFF,0x16]
+        else:
+            my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x02, 0x45, 0X00,0XFF,0x16]
         my_str_short[12] = my_inf_add_Low
         my_str_short[13] = my_inf_add_high
         my_str_short[14] = file_count
@@ -832,6 +1007,22 @@ def my_fun_work(buf, conn):
         my_str_to_hex_display(s3)
 
         print("Get File finish==%d" % file_count)
+        if my_get_file_e_status==1 and file_count>=9:
+            pass
+            time.sleep(1)
+            my_str_short = [0X68, 0X0B, 0X0B, 0X68, 0X73, 0X03, 0X00, 0X64, 0X01, 0X6D, 0X03, 0X00, 0X02, 0X45, 0X00,
+                            0XFF, 0X16]
+            my_str_short[5] = my_str_short[10] = dtu_add_Low
+            my_str_short[6] = my_str_short[11] = dtu_add_High
+            s2 = my_101_com_genert_CRC(my_str_short)
+            s3 = bytes(s2)
+            conn.send(s3)
+            my_all_step = 14
+
+            print("alarm Get File send data_E:", end='')
+            my_str_to_hex_display(s3)
+            my_get_file_e_status=0
+
 
     else:
         my_fun_send_OK(conn)
@@ -1036,7 +1227,7 @@ class MyServer(socketserver.BaseRequestHandler):
 
 
 if __name__ == '__main__':
-    #server = socketserver.ThreadingTCPServer(('106.14.41.25', 2216), MyServer)  ####20171215
-    server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
+    server = socketserver.ThreadingTCPServer(('106.14.41.25', 2216), MyServer)  ####20171215
+    #server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
 
     server.serve_forever()

@@ -7,7 +7,7 @@ import datetime
 import time
 
 
-def my_fun_write_recdata_tofile(mydata):
+def my_fun_write_recdata_tofile(mydata,myservertime2):
     mytodattime = datetime.datetime.now()
     myfilename = str(mytodattime.year) + str(mytodattime.month) + str(mytodattime.day) + '-' + str(
         mytodattime.hour) + '-' + str(mytodattime.minute) + '-' + str(mytodattime.second)
@@ -37,6 +37,11 @@ def my_fun_write_recdata_tofile(mydata):
     myfile = open(myfilename, "wt")
     myfile.write(myls)
     myfile.close()
+    #myservertime2
+    sqlstr = 'insert into tb_filename  VALUES (' + "\'" + str(myservertime2) + "\'" + ',\'' + str(myfilename) + '\')'
+    print(sqlstr)
+    my_fun_SQL_insertdata(sqlstr)
+
 
 
 dtu_add_Low = 0
@@ -320,16 +325,8 @@ def my_fun_work(buf, conn):
     global my_get_file_e_status
     #zsqA.Li_bat=0.0
     #zsqA.temperature=0.0
-
-
-
-
-
-
-
-
-
     mydtuadd = 0
+    myservertime=datetime.datetime.now()
     my_get_com_bytes = my_get_fram(buf)
 
     if my_get_com_bytes == None:
@@ -589,8 +586,7 @@ def my_fun_work(buf, conn):
         RTCtime = str(my_str2[22]) + "-" + str(my_str2[21]) + "-" + str(my_str2[20]) + " " + str(
             my_str2[19]) + ":" + str(my_str2[18]) + ":" + str(my_str2[16])
         mytodattime = datetime.datetime.now()
-        myservertime = str(mytodattime.year) + "-" + str(mytodattime.month) + "-" + str(mytodattime.day) + " " + str(
-            mytodattime.hour) + ":" + str(mytodattime.minute) + ":" + str(mytodattime.second)
+        myservertime = str(mytodattime)[:19]
         print('周期计数同步值')
         # 把收到的数据写入到数据库中
 
@@ -776,8 +772,7 @@ def my_fun_work(buf, conn):
         RTCtime = str(my_str2[22]) + "-" + str(my_str2[21]) + "-" + str(my_str2[20]) + " " + str(
             my_str2[19]) + ":" + str(my_str2[18]) + ":" + str(my_str2[16])
         mytodattime = datetime.datetime.now()
-        myservertime = str(mytodattime.year) + "-" + str(mytodattime.month) + "-" + str(mytodattime.day) + " " + str(
-            mytodattime.hour) + ":" + str(mytodattime.minute) + ":" + str(mytodattime.second)
+        myservertime = str(mytodattime)[:19]
         print('报警-计数同步值')
         # 把收到的数据写入到数据库中
 
@@ -982,11 +977,11 @@ def my_fun_work(buf, conn):
             if myIEadd == 0x4501 or myIEadd == 0x4601:
                 # print(my_zsq_recdata_buf_I)
                 mydata = (bytes)(my_zsq_recdata_buf_I)
-                my_fun_write_recdata_tofile(mydata)
+                my_fun_write_recdata_tofile(mydata,myservertime)
             else:
                 # print(my_zsq_recdata_buf_E)
                 mydata = (bytes)(my_zsq_recdata_buf_E)
-                my_fun_write_recdata_tofile(mydata)
+                my_fun_write_recdata_tofile(mydata,myservertime)
 
         # 文件写入操作结束
         if my_get_file_e_status==1:
