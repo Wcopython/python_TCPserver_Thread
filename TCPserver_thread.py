@@ -7,7 +7,7 @@ import datetime
 import time
 
 
-def my_fun_write_recdata_tofile(mydata,myservertime2):
+def my_fun_write_recdata_tofile(mydata,myservertime2,mydtuadd2):
     mytodattime = datetime.datetime.now()
     myfilename = str(mytodattime.year) + str(mytodattime.month) + str(mytodattime.day) + '-' + str(
         mytodattime.hour) + '-' + str(mytodattime.minute) + '-' + str(mytodattime.second)
@@ -38,7 +38,7 @@ def my_fun_write_recdata_tofile(mydata,myservertime2):
     myfile.write(myls)
     myfile.close()
     #myservertime2
-    sqlstr = 'insert into tb_filename  VALUES (' + "\'" + str(myservertime2) + "\'" + ',\'' + str(myfilename) + '\')'
+    sqlstr = 'insert into tb_filename  VALUES (' +str(mydtuadd2)+ ",\'" + str(myservertime2) + "\'" + ',\'' + str(myfilename) + '\')'
     print(sqlstr)
     my_fun_SQL_insertdata(sqlstr)
 
@@ -604,7 +604,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_I) + ',' + str(
             ac12tA.T2_I) + ',' + str(ac12tA.T3_I) + ',' + str(ac12tA.T4_I) + ',' + str(ac12tA.T5_I) + ',' + str(
             ac12tA.T6_I) + ',' + str(ac12tA.T7_I) + ',' + str(ac12tA.T8_I) + ',' + str(ac12tA.T9_I) + ',' + str(
@@ -612,7 +612,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_I) + ',' + str(
             ac12tB.T2_I) + ',' + str(ac12tB.T3_I) + ',' + str(ac12tB.T4_I) + ',' + str(ac12tB.T5_I) + ',' + str(
             ac12tB.T6_I) + ',' + str(ac12tB.T7_I) + ',' + str(ac12tB.T8_I) + ',' + str(ac12tB.T9_I) + ',' + str(
@@ -620,7 +620,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_I) + ',' + str(
             ac12tC.T2_I) + ',' + str(ac12tC.T3_I) + ',' + str(ac12tC.T4_I) + ',' + str(ac12tC.T5_I) + ',' + str(
             ac12tC.T6_I) + ',' + str(ac12tC.T7_I) + ',' + str(ac12tC.T8_I) + ',' + str(ac12tC.T9_I) + ',' + str(
@@ -628,7 +628,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_E) + ',' + str(
             ac12tA.T2_E) + ',' + str(ac12tA.T3_E) + ',' + str(ac12tA.T4_E) + ',' + str(ac12tA.T5_E) + ',' + str(
             ac12tA.T6_E) + ',' + str(ac12tA.T7_E) + ',' + str(ac12tA.T8_E) + ',' + str(ac12tA.T9_E) + ',' + str(
@@ -638,7 +638,7 @@ def my_fun_work(buf, conn):
 
 
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_E) + ',' + str(
             ac12tB.T2_E) + ',' + str(ac12tB.T3_E) + ',' + str(ac12tB.T4_E) + ',' + str(ac12tB.T5_E) + ',' + str(
             ac12tB.T6_E) + ',' + str(ac12tB.T7_E) + ',' + str(ac12tB.T8_E) + ',' + str(ac12tB.T9_E) + ',' + str(
@@ -648,7 +648,7 @@ def my_fun_work(buf, conn):
 
 
 
-        sqlstr = 'insert into TB_AC12T  VALUES (1,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_E) + ',' + str(
             ac12tC.T2_E) + ',' + str(ac12tC.T3_E) + ',' + str(ac12tC.T4_E) + ',' + str(ac12tC.T5_E) + ',' + str(
             ac12tC.T6_E) + ',' + str(ac12tC.T7_E) + ',' + str(ac12tC.T8_E) + ',' + str(ac12tC.T9_E) + ',' + str(
@@ -819,7 +819,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_I) + ',' + str(
             ac12tA.T2_I) + ',' + str(ac12tA.T3_I) + ',' + str(ac12tA.T4_I) + ',' + str(ac12tA.T5_I) + ',' + str(
             ac12tA.T6_I) + ',' + str(ac12tA.T7_I) + ',' + str(ac12tA.T8_I) + ',' + str(ac12tA.T9_I) + ',' + str(
@@ -829,7 +829,7 @@ def my_fun_work(buf, conn):
 
 
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_I) + ',' + str(
             ac12tB.T2_I) + ',' + str(ac12tB.T3_I) + ',' + str(ac12tB.T4_I) + ',' + str(ac12tB.T5_I) + ',' + str(
             ac12tB.T6_I) + ',' + str(ac12tB.T7_I) + ',' + str(ac12tB.T8_I) + ',' + str(ac12tB.T9_I) + ',' + str(
@@ -837,7 +837,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_I) + ',' + str(
             ac12tC.T2_I) + ',' + str(ac12tC.T3_I) + ',' + str(ac12tC.T4_I) + ',' + str(ac12tC.T5_I) + ',' + str(
             ac12tC.T6_I) + ',' + str(ac12tC.T7_I) + ',' + str(ac12tC.T8_I) + ',' + str(ac12tC.T9_I) + ',' + str(
@@ -845,7 +845,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_E) + ',' + str(
             ac12tA.T2_E) + ',' + str(ac12tA.T3_E) + ',' + str(ac12tA.T4_E) + ',' + str(ac12tA.T5_E) + ',' + str(
             ac12tA.T6_E) + ',' + str(ac12tA.T7_E) + ',' + str(ac12tA.T8_E) + ',' + str(ac12tA.T9_E) + ',' + str(
@@ -853,7 +853,7 @@ def my_fun_work(buf, conn):
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_E) + ',' + str(
             ac12tB.T2_E) + ',' + str(ac12tB.T3_E) + ',' + str(ac12tB.T4_E) + ',' + str(ac12tB.T5_E) + ',' + str(
             ac12tB.T6_E) + ',' + str(ac12tB.T7_E) + ',' + str(ac12tB.T8_E) + ',' + str(ac12tB.T9_E) + ',' + str(
@@ -863,7 +863,7 @@ def my_fun_work(buf, conn):
 
 
 
-        sqlstr = 'insert into TB_AC12T  VALUES (2,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_E) + ',' + str(
             ac12tC.T2_E) + ',' + str(ac12tC.T3_E) + ',' + str(ac12tC.T4_E) + ',' + str(ac12tC.T5_E) + ',' + str(
             ac12tC.T6_E) + ',' + str(ac12tC.T7_E) + ',' + str(ac12tC.T8_E) + ',' + str(ac12tC.T9_E) + ',' + str(
@@ -977,11 +977,11 @@ def my_fun_work(buf, conn):
             if myIEadd == 0x4501 or myIEadd == 0x4601:
                 # print(my_zsq_recdata_buf_I)
                 mydata = (bytes)(my_zsq_recdata_buf_I)
-                my_fun_write_recdata_tofile(mydata,myservertime)
+                my_fun_write_recdata_tofile(mydata,myservertime,mydtuadd)
             else:
                 # print(my_zsq_recdata_buf_E)
                 mydata = (bytes)(my_zsq_recdata_buf_E)
-                my_fun_write_recdata_tofile(mydata,myservertime)
+                my_fun_write_recdata_tofile(mydata,myservertime,mydtuadd)
 
         # 文件写入操作结束
         if my_get_file_e_status==1:
