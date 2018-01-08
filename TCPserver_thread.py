@@ -10,20 +10,29 @@ import time
 def my_fun_write_recdata_tofile(mydata,myservertime2,mydtuadd2):
     mytodattime = datetime.datetime.now()
     myfilename = str(mytodattime.year) + str(mytodattime.month) + str(mytodattime.day) + '-' + str(
-        mytodattime.hour) + '-' + str(mytodattime.minute) + '-' + str(mytodattime.second)
-    myfilename = myfilename + ".bat"
-    print(myfilename)
+        mytodattime.hour) + '-' + str(mytodattime.minute) + '-' + str(mytodattime.second)+str(mydtuadd2)
 
+    print(myfilename)
+    myzsqid=0
+    mystatus=0
     # mydata=bytes((0x01,0x2,0x03,0x4,0x05,0x06))
     # print(mydata)
     myls = ''
     my_value = list(mydata)
+    myzsqid=my_value[0]+my_value[1]*256
+    mytimer2=my_value[2]+my_value[3]*256
+
+    mygettime=str(my_value[10])+'-'+str(my_value[9])+'-'+str(my_value[8])+'='+str(my_value[7])+':'+str(my_value[6])+':'+str(my_value[4])
+    myls=myls+str(myzsqid)+'\n'
+    myls=myls+str(mytimer2)+'\n'
+    myls=myls+str(mygettime)+'\n'
     ii = 0
     while ii < len(my_value)-2:
         # 存储原始数据
         if ii<=10:
-            y = my_value[ii]
-            myls = myls + str(y) + '\n'
+            pass
+            #y = my_value[ii]
+            #myls = myls + str(y) + '\n'
             ii = ii + 1
             #print(ii)
         else:
@@ -34,6 +43,8 @@ def my_fun_write_recdata_tofile(mydata,myservertime2,mydtuadd2):
             #print(ii)
 
     # print(myls)
+
+    myfilename = myfilename + ".bat"
     myfile = open(myfilename, "wt")
     myfile.write(myls)
     myfile.close()
