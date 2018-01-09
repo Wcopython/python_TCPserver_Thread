@@ -1210,6 +1210,9 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         my_heart_time_count = my_heart_time_count + 1
         # my_str_to_hex_display(buf)
 
+    return dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, my_zsq_recdata_buf_pt, my_get_file_e_status
+
+
 
 ##################################################3333
 ##多线程处理函数
@@ -1225,6 +1228,8 @@ class MyServer(socketserver.BaseRequestHandler):
         my_all_step = 0
         my_heart_time_count = 1
         file_count = 0
+        my_zsq_recdata_buf_pt = 0
+        my_get_file_e_status = 0
 
         zsqA = ZSQ()
         zsqB = ZSQ()
@@ -1246,7 +1251,7 @@ class MyServer(socketserver.BaseRequestHandler):
         while Flag:
             data = conn.recv(1024)
             # print(data)
-            my_fun_work(data, conn,dtu_add_Low,dtu_add_High,my_all_step,my_heart_time_count,file_count,zsqA,zsqB,zsqC,zsqX,mydtu,ac12tA,ac12tB,ac12tC,my_zsq_recdata_buf_I,my_zsq_recdata_buf_E,my_zsq_recdata_buf_pt,my_get_file_e_status)
+            dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, my_zsq_recdata_buf_pt, my_get_file_e_status=my_fun_work(data,conn,dtu_add_Low,dtu_add_High,my_all_step,my_heart_time_count,file_count,zsqA,zsqB,zsqC,zsqX,mydtu,ac12tA,ac12tB,ac12tC,my_zsq_recdata_buf_I,my_zsq_recdata_buf_E,my_zsq_recdata_buf_pt,my_get_file_e_status)
 
 
 if __name__ == '__main__':
