@@ -302,41 +302,28 @@ class AC12T:
 
 
 
-def my_fun_work(buf, conn):
-    #global my_all_step
-    #global my_heart_time_count
-    #global file_count
-    #global zsqA
-    #global zsqB
-    #global zsqC
-    #global zsqX
+def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_count2,file_count2,zsqA2,zsqB2,zsqC2,zsqX2,mydtu2,ac12tA2,ac12tB2,ac12tC2,my_zsq_recdata_buf_I2,my_zsq_recdata_buf_E2,my_zsq_recdata_buf_pt2,my_get_file_e_status2):
 
-    #global mydtu
-    #global ac12tA
-    #global ac12tB
-    #global ac12tC
-    #global my_zsq_recdata_buf_pt
-    #global my_get_file_e_status
-    dtu_add_Low = 0
-    dtu_add_High = 0
-    my_all_step = 0
-    my_heart_time_count = 1
-    file_count = 0
+    dtu_add_Low = dtu_add_Low2
+    dtu_add_High = dtu_add_High2
+    my_all_step = my_all_step2
+    my_heart_time_count = my_heart_time_count2
+    file_count = file_count2
 
-    zsqA = ZSQ()
-    zsqB = ZSQ()
-    zsqC = ZSQ()
-    zsqX = ZSQalarm()
+    zsqA = zsqA2
+    zsqB = zsqB2
+    zsqC = zsqC2
+    zsqX = zsqX2
 
-    mydtu = DTU()
-    ac12tA = AC12T()
-    ac12tB = AC12T()
-    ac12tC = AC12T()
+    mydtu = mydtu2
+    ac12tA = ac12tA2
+    ac12tB = ac12tB2
+    ac12tC = ac12tC2
 
-    my_zsq_recdata_buf_I = [0] * 2000
-    my_zsq_recdata_buf_E = [0] * 2000
-    my_zsq_recdata_buf_pt = 0
-    my_get_file_e_status = 0
+    my_zsq_recdata_buf_I = my_zsq_recdata_buf_I2
+    my_zsq_recdata_buf_E = my_zsq_recdata_buf_E2
+    my_zsq_recdata_buf_pt = my_zsq_recdata_buf_pt2
+    my_get_file_e_status = my_get_file_e_status2
 
 
     #zsqA.Li_bat=0.0
@@ -1233,10 +1220,33 @@ class MyServer(socketserver.BaseRequestHandler):
         conn.sendall(myls)
         Flag = True
 
+        dtu_add_Low = 0
+        dtu_add_High = 0
+        my_all_step = 0
+        my_heart_time_count = 1
+        file_count = 0
+
+        zsqA = ZSQ()
+        zsqB = ZSQ()
+        zsqC = ZSQ()
+        zsqX = ZSQalarm()
+
+        mydtu = DTU()
+        ac12tA = AC12T()
+        ac12tB = AC12T()
+        ac12tC = AC12T()
+
+        my_zsq_recdata_buf_I = [0] * 2000
+        my_zsq_recdata_buf_E = [0] * 2000
+        my_zsq_recdata_buf_pt = 0
+        my_get_file_e_status = 0
+
+
+
         while Flag:
             data = conn.recv(1024)
             # print(data)
-            my_fun_work(data, conn)
+            my_fun_work(data, conn,dtu_add_Low,dtu_add_High,my_all_step,my_heart_time_count,file_count,zsqA,zsqB,zsqC,zsqX,mydtu,ac12tA,ac12tB,ac12tC,my_zsq_recdata_buf_I,my_zsq_recdata_buf_E,my_zsq_recdata_buf_pt,my_get_file_e_status)
 
 
 if __name__ == '__main__':
