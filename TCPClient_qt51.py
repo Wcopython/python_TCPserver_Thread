@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
-from demo2 import Ui_Form
+from  PyQt5 import QtCore
+from PyQt5.QtGui import QColor,QFont
+from demo3 import Ui_Form
 import pymssql
 import _mssql
 import uuid
@@ -112,9 +114,37 @@ class mywindow(QtWidgets.QWidget,Ui_Form):
         #mygetstr1=self.listWidget1.item(self.listWidget1.currentRow()).text()
         mygetscrolldata=self.listWidget1.currentItem().text()
         self.textEdit1.setText(str(mygetscrolldata))
+    def bt3_click(self):
+        pass
+        myid=self.textEdit.toPlainText()
+        print(myid)
+
+        mysql1 = "select top 100 * from TB_View_cycdata where dtuid="+str(myid)+" order by ID DESC "
+        mygetserverdata = my_fun_SQL_readdata(mysql1)
+        print(type(mygetserverdata))
+        myrow_count=len(mygetserverdata)
+        myclomn_count=len(mygetserverdata[0])
+        self.tableWidget1.setRowCount(myrow_count)
+        self.tableWidget1.setColumnCount(myclomn_count)
+        mystr0 = ['ID','DTUID', 'status', '服务器时间', 'DTU时标', 'A相时标', 'B相时标', 'C相时标', 'A电流', 'B电流', 'C电流', 'A电场', 'B电场', 'C电场',
+                  'A半波', 'B半波', 'C半波', 'A短路', 'B短路', 'C短路', 'A接地', 'B接地', 'C接地', '报警相序', '报警时间', 'A锂电池', 'B锂电池', 'C锂电池',
+                  'A太阳能', 'B太阳能', 'C太阳能', 'A线上电', 'B线上电', 'C线上电', 'A温度', 'B温度', 'C温度', 'A_timer', 'B_timer', 'C_timer',
+                  'DTUdatetime', 'DTU电池', 'DTU太阳能', 'DTU温度', 'DTU湿度']
+        self.tableWidget1.setHorizontalHeaderLabels(mystr0)
+        for xx in range(0,myrow_count):
+            self.tableWidget1.setColumnWidth(xx,100)
+        #self.tableWidget1.setHorizontalHeaderLabels(['姓名','性别','体重'])
+        for xx in range(0,myrow_count):
+            for yy in range(0,myclomn_count):
+                pass
+                newitem=QTableWidgetItem(str(mygetserverdata[xx][yy]))
+                #newitem.setfont(QFont("Times",8,QFont.Black))
+                self.tableWidget1.setItem(xx,yy,newitem)
 
 
-        #print(mygetscrolldata)
+
+
+
 
 
 if __name__=="__main__":
@@ -123,7 +153,7 @@ if __name__=="__main__":
     app=QtWidgets.QApplication(sys.argv)
     myshow=mywindow()
     myshow.label.setText("点击 《刷新》 按钮获得最新的100条数据"+'\n'+"然后单击条目,"+'\n'+"最后点击 《确定》 按钮显示图形")
-    myshow.setWindowTitle("波形显示软件20180128V1")
+    myshow.setWindowTitle("波形显示软件20180128V2")
 
     myshow.show()
     sys.exit(app.exec_())
