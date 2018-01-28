@@ -113,6 +113,20 @@ def callback1():
     except:
         #print("此文件数据没有入库！！")
         messagebox.showwarning("警告","此文件数据没有入库！！")
+def callback2():
+    pass
+    mylist1.delete(0,300)
+    mylist1.update()
+    mysql1 = "select top 100 * from tb_filename order by ID desc "
+    mygetserverdata = my_fun_SQL_readdata(mysql1)
+    # print(type(mygetserverdata))
+    # print(len(mygetserverdata))
+    for i in range(0, len(mygetserverdata)):
+        mystr0 = str(mygetserverdata[i][0]) + ", " + str(mygetserverdata[i][1]) + ", " + str(
+            mygetserverdata[i][2]) + ", " + str(mygetserverdata[i][3])
+        # print(mystr0)
+        mylist1.insert(i, str(mystr0))
+    mylist1.update()
 
 
 
@@ -138,6 +152,10 @@ mybt1=tkinter.Button(win,text="确定")
 mybt1.config(command=callback1)
 mybt1.pack(side=tkinter.RIGHT)
 
+mybt2=tkinter.Button(win,text="刷新")
+mybt2.config(command=callback2)
+mybt2.pack(side=tkinter.RIGHT)
+
 
 
 mylist1=tkinter.Listbox(win)
@@ -145,7 +163,7 @@ mylist1.bind('<ButtonRelease-1>',myprint_item)
 mylist1.config(width=60)
 
 
-mysql1="select top 200 * from tb_filename order by ID desc "
+mysql1="select top 100 * from tb_filename order by ID desc "
 mygetserverdata=my_fun_SQL_readdata(mysql1)
 #print(type(mygetserverdata))
 #print(len(mygetserverdata))
