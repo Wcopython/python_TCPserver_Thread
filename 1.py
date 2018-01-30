@@ -8,10 +8,38 @@ import _mssql
 import uuid
 import decimal
 import matplotlib.pyplot as pl
+import xlwt
+
+#############excel############
+
+myfilename_GL=''
+mygetdata_GL=[]
+
+
+def write_data_to_excel(self,name,data):
+
+    result = data
+    # 实例化一个Workbook()对象(即excel文件)
+    wbk = xlwt.Workbook()
+    # 新建一个名为Sheet1的excel sheet。此处的cell_overwrite_ok =True是为了能对同一个单元格重复操作。
+    sheet = wbk.add_sheet('Sheet1',cell_overwrite_ok=True)
+    #sheet.write("相序波形")
+    sheet.write(0,0,str(result[0]))
+    # 遍历result中的每个个元素。
+    for i in range(1,len(result)):
+        #将每一行的每个元素按行号i,列号j,写入到excel中。
+        sheet.write(i,0,result[i])
+        # 以传递的name+当前日期作为excel名称保存。
+    wbk.save(name+'.xls')
+    QMessageBox.information( self,"恭喜！！", name+': '+"文件导出成功")
+
 
 ########################
-def my_fun_displaydata(mygetid2):
+def my_fun_displaydata(self,mygetid2,myfilename):
     # 从数据库读取数据
+    global myfilename_GL
+    global mygetdata_GL
+    myfilename_GL=myfilename
     mysql1 = "select * from tb_filename where id= "+str(mygetid2)
     mygetserverdata = my_fun_SQL_readdata(mysql1)
     mystr1 = mygetserverdata[0][4]
@@ -21,6 +49,38 @@ def my_fun_displaydata(mygetid2):
     ZSQTimer = int(mylist3[2])
     mygetdatetime = mylist3[3]
     mygetdata = [float(x) for x in mylist3[4:964]]
+    mygetdata_GL=mygetdata
+
+    ##数据展示
+    self.textEdit_2.setPlainText(
+        "ID=" + str(mygetid2) + ' ' + str(mydtuadd3) + ' ' + str(ZSQID) + ' ' + str(mygetdatetime))
+    myrow_count = len(mygetdata)
+    myclomn_count = 1
+    self.tableWidget2.setRowCount(myrow_count)
+    self.tableWidget2.setColumnCount(myclomn_count)
+    if ZSQID == 1:
+        myhead = "A相电流"
+    elif ZSQID == 11:
+        myhead = "A相电电场"
+    elif ZSQID == 2:
+        myhead = "B相电电场"
+    elif ZSQID == 12:
+        myhead = "B相电电场"
+    elif ZSQID == 3:
+        myhead = "C相电电场"
+    elif ZSQID == 13:
+        myhead = "C相电电场"
+    else:
+        myhead = "未知相"
+
+    mystr0 = [str(myhead)]
+    self.tableWidget2.setHorizontalHeaderLabels(mystr0)
+    for xx in range(0, myrow_count):
+        newitem = QTableWidgetItem(str(mygetdata[xx]))
+        self.tableWidget2.setItem(xx, 0, newitem)
+
+
+    ##########plot画图部分
     t = mygetdata
     pl.figure(num=2, figsize=(6, 4))
     x0 = []
@@ -30,6 +90,12 @@ def my_fun_displaydata(mygetid2):
         mygetdatetime)
     pl.title(mytitle)
     pl.show()
+    #数据保存
+    mygetdata_GL.insert(0, str(myhead))
+
+
+
+
 
 
 
@@ -98,16 +164,17 @@ class mywindow(QtWidgets.QWidget,Ui_Form):
             #mylist1.insert(i, str(mystr0))
     def bt2_click(self):  # 定义槽函数btn_click(),也可以理解为重载类Ui_MainWindow中的槽函数btn_click()
         global mygetscrolldata
-        #self.label.setText("显示曲线")
-        mygetid = str(mygetscrolldata).split(",")
-        mygetid = int(mygetid[0])
-        # print(mygetid)
         try:
-            my_fun_displaydata(mygetid)
+            #self.label.setText("显示曲线")
+            mygetdata= str(mygetscrolldata).split(",")
+            mygetid = int(mygetdata[0])
+            myfilename=str(mygetdata[3])
+            # print(mygetid)
+            my_fun_displaydata(self,mygetid,myfilename)
         except:
             # print("此文件数据没有入库！！")
             pass
-            QMessageBox.information(self, "警告", "此文件数据没有入库！！")
+            QMessageBox.information(self, "警告", "没选取波形文件数据")
 
     def LW1_dclick(self):
         global mygetscrolldata
@@ -121,7 +188,7 @@ class mywindow(QtWidgets.QWidget,Ui_Form):
 
         mysql1 = "select top 100 * from TB_View_cycdata where dtuid="+str(myid)+" order by ID DESC "
         mygetserverdata = my_fun_SQL_readdata(mysql1)
-        print(type(mygetserverdata))
+        #print(type(mygetserverdata))
         myrow_count=len(mygetserverdata)
         myclomn_count=len(mygetserverdata[0])
         self.tableWidget1.setRowCount(myrow_count)
@@ -142,7 +209,25 @@ class mywindow(QtWidgets.QWidget,Ui_Form):
                 self.tableWidget1.setItem(xx,yy,newitem)
 
 
+    def bt4_click(self): #excel导出
 
+        pass
+        global myfilename_GL
+        global mygetdata_GL
+        try:
+            write_data_to_excel(self,myfilename_GL,mygetdata_GL)
+        except:
+            QMessageBox.information(self, "警告", "没有选择波形文件")
+
+    def bt5_click(self): #查询特点DTU波形
+        pass
+        mysql1 = "select top 100 * from tb_filename where DTUID="+str(self.textEdit_3.toPlainText())+"order by ID desc "
+        mygetserverdata = my_fun_SQL_readdata(mysql1)
+        self.listWidget1.clear()
+        for i in range(0, len(mygetserverdata)):
+            mystr0 = str(mygetserverdata[i][0]) + ", " + str(mygetserverdata[i][1]) + ", " + str(
+                mygetserverdata[i][2]) + ", " + str(mygetserverdata[i][3])
+            self.listWidget1.addItem(str(mystr0))
 
 
 
@@ -152,8 +237,8 @@ if __name__=="__main__":
 
     app=QtWidgets.QApplication(sys.argv)
     myshow=mywindow()
-    myshow.label.setText("点击 《刷新》 按钮获得最新的100条数据"+'\n'+"然后单击条目,"+'\n'+"最后点击 《确定》 按钮显示图形")
-    myshow.setWindowTitle("波形显示软件20180128V2")
+    myshow.label.setText("（1）点击 《刷新XX》 按钮获得最新的100条数据,（2）然后单击条目,(3)最后点击 《确定显示波形》 按钮显示图形。(4)点击《导出到excel》可以把波形数据导出到excel")
+    myshow.setWindowTitle("波形显示软件20180130V3")
 
     myshow.show()
     sys.exit(app.exec_())

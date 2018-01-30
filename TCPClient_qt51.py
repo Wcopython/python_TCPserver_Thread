@@ -88,7 +88,7 @@ class mywindow(QtWidgets.QWidget,Ui_Form):
 
     def bt1_click(self):  # 定义槽函数btn_click(),也可以理解为重载类Ui_MainWindow中的槽函数btn_click()
         #self.label.setText("点击 刷新 按钮获得最新的100条数据，然后单击条目，最后后点击 确定 按钮显示图形")
-        mysql1 = "select top 100 * from tb_filename order by ID desc "
+        mysql1 = "select top 100 * from tb_filename  where dtuid=65104 order by ID desc"
         mygetserverdata = my_fun_SQL_readdata(mysql1)
         self.listWidget1.clear()
         for i in range(0, len(mygetserverdata)):
