@@ -7,40 +7,47 @@ import datetime
 import time
 
 
-def my_fun_write_recdata_tofile(mydata,myservertime2,mydtuadd2):
+def my_fun_write_recdata_tofile(mydata, myservertime2, mydtuadd2,E_status):#E_status表示传递电场数据，1就是电场，0是电流
     mytodattime = datetime.datetime.now()
+    myEID=(int)(E_status)
+    if myEID==1:
+        myaddstr="E"
+    else:
+        myaddstr = "A"
     myfilename = str(mytodattime.year) + str(mytodattime.month) + str(mytodattime.day) + '-' + str(
-        mytodattime.hour) + '-' + str(mytodattime.minute) + '-' + str(mytodattime.second)+str(mydtuadd2)
+        mytodattime.hour) + '-' + str(mytodattime.minute) + '-' + str(mytodattime.second) + '-'+ str(mydtuadd2)+str(myaddstr)
 
     print(myfilename)
-    myzsqid=0
-    mystatus=0
+    myzsqid = 0
+    mystatus = 0
     # mydata=bytes((0x01,0x2,0x03,0x4,0x05,0x06))
     # print(mydata)
     myls = ''
     my_value = list(mydata)
-    myzsqid=my_value[0]+my_value[1]*256
-    mytimer2=my_value[2]+my_value[3]*256
+    myzsqid = my_value[0] + my_value[1] * 256+myEID*10
+    mytimer2 = my_value[2] + my_value[3] * 256
 
-    mygettime=str(my_value[10])+'-'+str(my_value[9])+'-'+str(my_value[8])+'='+str(my_value[7])+':'+str(my_value[6])+':'+str(my_value[4])
-    myls=myls+str(myzsqid)+'\n'
-    myls=myls+str(mytimer2)+'\n'
-    myls=myls+str(mygettime)+'\n'
+    mygettime = str(my_value[10]) + '-' + str(my_value[9]) + '-' + str(my_value[8]) + '=' + str(
+        my_value[7]) + ':' + str(my_value[6]) + ':' + str(my_value[4])
+    myls=myls+str(mydtuadd2)+ '\n'
+    myls = myls + str(myzsqid) + '\n'
+    myls = myls + str(mytimer2) + '\n'
+    myls = myls + str(mygettime) + '\n'
     ii = 0
-    while ii < len(my_value)-2:
+    while ii < len(my_value) - 2:
         # 存储原始数据
-        if ii<=10:
+        if ii <= 10:
             pass
-            #y = my_value[ii]
-            #myls = myls + str(y) + '\n'
+            # y = my_value[ii]
+            # myls = myls + str(y) + '\n'
             ii = ii + 1
-            #print(ii)
+            # print(ii)
         else:
             # 直接进行转换
-            y = (my_value[ii] + my_value[ii + 1]* 256) / 10.0
+            y = (my_value[ii] + my_value[ii + 1] * 256) / 10.0
             myls = myls + str(y) + '\n'
             ii = ii + 2
-            #print(ii)
+            # print(ii)
 
     # print(myls)
 
@@ -48,17 +55,13 @@ def my_fun_write_recdata_tofile(mydata,myservertime2,mydtuadd2):
     myfile = open(myfilename, "wt")
     myfile.write(myls)
     myfile.close()
-    #myservertime2
-    sqlstr = 'insert into tb_filename  VALUES (' +str(mydtuadd2)+ ",\'" + str(myservertime2) + "\'" + ',\'' + str(myfilename) + '\')'
-    print(sqlstr)
+    # myservertime2
+    sqlstr = 'insert into tb_filename  VALUES (' + str(mydtuadd2) + ",\'" + str(myservertime2) + "\'" + ',\'' + str(myfilename) + "\'" + ",\'" + myls + "\')"
+    #print(sqlstr)
     my_fun_SQL_insertdata(sqlstr)
 
 
-
-
-
-
-def my_fun_send_OK(conn,my_dtu_add_low,my_dtu_add_high):
+def my_fun_send_OK(conn, my_dtu_add_low, my_dtu_add_high):
     my_str_short = [0x10, 0x80, 0x01, 0x00, 0x81, 0x16]
     my_str_short[2] = (int)(my_dtu_add_low)
     my_str_short[3] = (int)(my_dtu_add_high)
@@ -110,7 +113,7 @@ def my_get_fram(s0):
             status = 0
 
         if status == 0x10:
-            if len(s2)<5:
+            if len(s2) < 5:
                 break
             x = s2[my_start + 5]
             if x == 0x16:
@@ -118,7 +121,7 @@ def my_get_fram(s0):
 
                 break
         elif status == 0x68:
-            if len(s2)<10:
+            if len(s2) < 10:
                 break
             x = s2[my_start + 3]
             if x == 0x68:
@@ -231,8 +234,10 @@ class ZSQ:
         self.A_half = 0.0
         self.Gan_bat = 0.0
         self.timer = 0
-        self.alarmid=0
-        self.RTCtime='2017-1-1 0:0:0'
+        self.alarmid = 0
+        self.RTCtime = '2017-1-1 0:0:0'
+
+
 class ZSQalarm:
     def __init__(self):
         self.duanlu = 0  # 短路
@@ -246,11 +251,11 @@ class ZSQalarm:
         self.A_half = 0.0
         self.Gan_bat = 0.0
         self.timer = 0
-        self.alarmid=0
-        self.RTCtime=''
-        self.A_I=0.0
-        self.A_E=0.0
-        self.A_half_I=0.0
+        self.alarmid = 0
+        self.RTCtime = ''
+        self.A_I = 0.0
+        self.A_E = 0.0
+        self.A_half_I = 0.0
         self.B_I = 0.0
         self.B_E = 0.0
         self.B_half_I = 0.0
@@ -258,7 +263,6 @@ class ZSQalarm:
         self.C_I = 0.0
         self.C_E = 0.0
         self.C_half_I = 0.0
-
 
 
 class DTU:
@@ -298,12 +302,7 @@ class AC12T:
         self.T12_E = 0.0
 
 
-
-
-
-
-def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_count2,file_count2,zsqA2,zsqB2,zsqC2,zsqX2,mydtu2,ac12tA2,ac12tB2,ac12tC2,my_zsq_recdata_buf_I2,my_zsq_recdata_buf_E2,my_zsq_recdata_buf_pt2,my_get_file_e_status2):
-
+def my_fun_work(buf, conn, dtu_add_Low2, dtu_add_High2, my_all_step2, my_heart_time_count2, file_count2, zsqA2, zsqB2,zsqC2, zsqX2, mydtu2, ac12tA2, ac12tB2, ac12tC2, my_zsq_recdata_buf_I2, my_zsq_recdata_buf_E2,my_zsq_recdata_buf_pt2, my_get_file_e_status2):
     dtu_add_Low = dtu_add_Low2
     dtu_add_High = dtu_add_High2
     my_all_step = my_all_step2
@@ -325,11 +324,10 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
     my_zsq_recdata_buf_pt = my_zsq_recdata_buf_pt2
     my_get_file_e_status = my_get_file_e_status2
 
-
-    #zsqA.Li_bat=0.0
-    #zsqA.temperature=0.0
+    # zsqA.Li_bat=0.0
+    # zsqA.temperature=0.0
     mydtuadd = 0
-    myservertime=datetime.datetime.now()
+    myservertime = datetime.datetime.now()
     my_get_com_bytes = my_get_fram(buf)
 
     if my_get_com_bytes == None:
@@ -359,7 +357,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print("send   data:", end='')
         my_str_to_hex_display(s3)
     elif my_str2[0] == 0x10 and my_str2[1] == 0x40 and my_all_step == 1:
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         # 10 C9 01 00 CA 16
         my_str_short = [0x10, 0xC9, 0x01, 0x00, 0x81, 0x16]
         my_str_short[2] = dtu_add_Low
@@ -415,7 +413,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
 
     # 心跳包
     elif my_str2[0] == 0x10 and my_str2[1] == 0xD2:
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         print("heart time finish==")
         # 计数同步值
         my_str_short = [0x68, 0x0C, 0x0C, 0x68, 0x73, 0x01, 0x00, 0xDC, 0x01, 0x65, 0x01, 0x00, 0x01, 0x4F, 0x01, 0x02,
@@ -437,7 +435,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         pass
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x67 and my_str2[
         9] == 0x07 and my_all_step == 5:
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         print("RTC time finish==")
 
     # 周期数据应答
@@ -445,7 +443,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         9] == 0x06:
         # 密码验证
         print('周期密码OK')
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x02 and my_str2[
         9] == 0x14:
         # 遥信数据
@@ -456,7 +454,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         zsqC.duanlu = my_str2[18]
         zsqC.jiedi = my_str2[19]
         print('周期遥信')
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[
         9] == 0x14:
         # 遥测数据
@@ -482,9 +480,9 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
             mydtu.temperature = (my_str2[18] + my_str2[19] * 256) / 10.0
             mydtu.shidu = (my_str2[20] + my_str2[21] * 256) / 10.0
             print('周期遥测环境数据')
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and (
-                my_str2[9] == 0x67 or my_str2[9] == 0x68 or my_str2[9] == 0x69):
+                        my_str2[9] == 0x67 or my_str2[9] == 0x68 or my_str2[9] == 0x69):
         # 遥测补充、遥测12T、计数同步值
         if my_str2[9] == 0x67:
             zsqA.Sun_bat = (my_str2[14] + my_str2[15] * 256) / 10.0
@@ -581,7 +579,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
             ac12tC.T11_E = (my_str2[154] + my_str2[155] * 256) / 10.0
             ac12tC.T12_E = (my_str2[156] + my_str2[157] * 256) / 10.0
             print('周期遥测12T')
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0xDC and my_str2[
         9] == 0x69:
 
@@ -603,11 +601,12 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
             zsqB.xian_V) + ',' + str(zsqB.A_half) + ',' + str(zsqB.Gan_bat) + ',' + str(zsqB.temperature) + ',' + str(
             zsqB.timer) + ',' + str(zsqC.duanlu) + ',' + str(zsqC.jiedi) + ',' + str(zsqC.A_all) + ',' + str(
             zsqC.E_fild) + ',' + str(zsqC.Li_bat) + ',' + str(zsqC.Sun_bat) + ',' + str(zsqC.xian_V) + ',' + str(
-            zsqC.A_half) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer) +',0,0'+ ')'
+            zsqC.A_half) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer) + ',0,0' + ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',1,11,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_I) + ',' + str(
             ac12tA.T2_I) + ',' + str(ac12tA.T3_I) + ',' + str(ac12tA.T4_I) + ',' + str(ac12tA.T5_I) + ',' + str(
             ac12tA.T6_I) + ',' + str(ac12tA.T7_I) + ',' + str(ac12tA.T8_I) + ',' + str(ac12tA.T9_I) + ',' + str(
@@ -615,7 +614,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',1,21,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_I) + ',' + str(
             ac12tB.T2_I) + ',' + str(ac12tB.T3_I) + ',' + str(ac12tB.T4_I) + ',' + str(ac12tB.T5_I) + ',' + str(
             ac12tB.T6_I) + ',' + str(ac12tB.T7_I) + ',' + str(ac12tB.T8_I) + ',' + str(ac12tB.T9_I) + ',' + str(
@@ -623,7 +623,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',1,31,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_I) + ',' + str(
             ac12tC.T2_I) + ',' + str(ac12tC.T3_I) + ',' + str(ac12tC.T4_I) + ',' + str(ac12tC.T5_I) + ',' + str(
             ac12tC.T6_I) + ',' + str(ac12tC.T7_I) + ',' + str(ac12tC.T8_I) + ',' + str(ac12tC.T9_I) + ',' + str(
@@ -631,7 +632,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',1,12,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_E) + ',' + str(
             ac12tA.T2_E) + ',' + str(ac12tA.T3_E) + ',' + str(ac12tA.T4_E) + ',' + str(ac12tA.T5_E) + ',' + str(
             ac12tA.T6_E) + ',' + str(ac12tA.T7_E) + ',' + str(ac12tA.T8_E) + ',' + str(ac12tA.T9_E) + ',' + str(
@@ -639,9 +641,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-
-
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',1,22,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_E) + ',' + str(
             ac12tB.T2_E) + ',' + str(ac12tB.T3_E) + ',' + str(ac12tB.T4_E) + ',' + str(ac12tB.T5_E) + ',' + str(
             ac12tB.T6_E) + ',' + str(ac12tB.T7_E) + ',' + str(ac12tB.T8_E) + ',' + str(ac12tB.T9_E) + ',' + str(
@@ -649,9 +650,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-
-
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',1,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',1,32,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_E) + ',' + str(
             ac12tC.T2_E) + ',' + str(ac12tC.T3_E) + ',' + str(ac12tC.T4_E) + ',' + str(ac12tC.T5_E) + ',' + str(
             ac12tC.T6_E) + ',' + str(ac12tC.T7_E) + ',' + str(ac12tC.T8_E) + ',' + str(ac12tC.T9_E) + ',' + str(
@@ -659,37 +659,43 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
     #######################################3
     # 报警数据处理
-    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x01 and my_str2[9] == 0x03:
-        zsqinf = ((my_str2[12])//2)
-        zsqX.alarmid=zsqinf+1
-        if my_str2[12]%2==0:
-            zsqX.duanlu=my_str2[14]
-            zsqX.jiedi=0
+    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x01 and my_str2[
+        9] == 0x03:
+        zsqinf = ((my_str2[12]) // 2)
+        zsqX.alarmid = zsqinf + 1
+        if my_str2[12] % 2 == 0:
+            zsqX.duanlu = my_str2[14]
+            zsqX.jiedi = 0
         else:
-            zsqX.jiedi=my_str2[14]
-            zsqX.duanlu=0
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+            zsqX.jiedi = my_str2[14]
+            zsqX.duanlu = 0
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         print("报警-遥信无时标")
-    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x1E and my_str2[9] == 0x03:
-        zsqX.RTCtime=str(str(my_str2[21])+"-"+str(my_str2[20])+"-"+str(my_str2[19])+" "+str(my_str2[18])+":"+str(my_str2[17])+":"+str(my_str2[15]))
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x1E and my_str2[
+        9] == 0x03:
+        zsqX.RTCtime = str(
+            str(my_str2[21]) + "-" + str(my_str2[20]) + "-" + str(my_str2[19]) + " " + str(my_str2[18]) + ":" + str(
+                my_str2[17]) + ":" + str(my_str2[15]))
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         print("报警-遥信有时标")
-    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[9] == 0x6A:
-        zsqX.A_I =(my_str2[14]+my_str2[15]*256)/10.0
-        zsqX.A_E =(my_str2[16] + my_str2[17] * 256)/10.0
-        zsqX.A_half_I=(my_str2[18] + my_str2[19] * 256)/10.0
+    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[
+        9] == 0x6A:
+        zsqX.A_I = (my_str2[14] + my_str2[15] * 256) / 10.0
+        zsqX.A_E = (my_str2[16] + my_str2[17] * 256) / 10.0
+        zsqX.A_half_I = (my_str2[18] + my_str2[19] * 256) / 10.0
         zsqX.B_I = (my_str2[20] + my_str2[21] * 256) / 10.0
         zsqX.B_E = (my_str2[22] + my_str2[23] * 256) / 10.0
         zsqX.B_half_I = (my_str2[24] + my_str2[25] * 256) / 10.0
         zsqX.C_I = (my_str2[26] + my_str2[27] * 256) / 10.0
         zsqX.C_E = (my_str2[28] + my_str2[29] * 256) / 10.0
         zsqX.C_half_I = (my_str2[30] + my_str2[31] * 256) / 10.0
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         print("报警-遥测AC")
-    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[9] == 0x6B:
+    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[
+        9] == 0x6B:
         ac12tA.T1_I = (my_str2[14] + my_str2[15] * 256) / 10.0
         ac12tA.T2_I = (my_str2[16] + my_str2[17] * 256) / 10.0
         ac12tA.T3_I = (my_str2[18] + my_str2[19] * 256) / 10.0
@@ -767,9 +773,10 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         ac12tC.T10_E = (my_str2[152] + my_str2[153] * 256) / 10.0
         ac12tC.T11_E = (my_str2[154] + my_str2[155] * 256) / 10.0
         ac12tC.T12_E = (my_str2[156] + my_str2[157] * 256) / 10.0
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         print("报警-遥测12T")
-    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0xDC and my_str2[9] == 0x6C:
+    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0xDC and my_str2[
+        9] == 0x6C:
 
         dtutimer = (my_str2[14] + my_str2[15] * 256)
         RTCtime = str(my_str2[22]) + "-" + str(my_str2[21]) + "-" + str(my_str2[20]) + " " + str(
@@ -779,19 +786,22 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print('报警-计数同步值')
         # 把收到的数据写入到数据库中
 
-        if zsqX.alarmid==1:
+        if zsqX.alarmid == 1:
             sqlstr = 'insert into TB_cycdata  VALUES (2,' + "\'" + str(myservertime) + "\'" + ',' + str(
                 mydtuadd) + ',' + "\'" + str(RTCtime) + "\'" + ',' + str(dtutimer) + ',' + str(mydtu.bat_v) + ',' + str(
-                mydtu.bat_sun) + ',' + str(mydtu.temperature) + ',' + str(mydtu.shidu) + ',' + str(zsqX.duanlu) + ',' + str(
+                mydtu.bat_sun) + ',' + str(mydtu.temperature) + ',' + str(mydtu.shidu) + ',' + str(
+                zsqX.duanlu) + ',' + str(
                 zsqX.jiedi) + ',' + str(zsqX.A_I) + ',' + str(zsqX.A_E) + ',' + str(zsqA.Li_bat) + ',' + str(
                 zsqA.Sun_bat) + ',' + str(zsqA.xian_V) + ',' + str(zsqX.A_half_I) + ',' + str(zsqA.Gan_bat) + ',' + str(
                 zsqA.temperature) + ',' + str(zsqA.timer) + ',' + str(zsqB.duanlu) + ',' + str(zsqB.jiedi) + ',' + str(
                 zsqX.B_I) + ',' + str(zsqX.B_E) + ',' + str(zsqB.Li_bat) + ',' + str(zsqB.Sun_bat) + ',' + str(
-                zsqB.xian_V) + ',' + str(zsqX.B_half_I) + ',' + str(zsqB.Gan_bat) + ',' + str(zsqB.temperature) + ',' + str(
+                zsqB.xian_V) + ',' + str(zsqX.B_half_I) + ',' + str(zsqB.Gan_bat) + ',' + str(
+                zsqB.temperature) + ',' + str(
                 zsqB.timer) + ',' + str(zsqC.duanlu) + ',' + str(zsqC.jiedi) + ',' + str(zsqX.C_I) + ',' + str(
                 zsqX.C_E) + ',' + str(zsqC.Li_bat) + ',' + str(zsqC.Sun_bat) + ',' + str(zsqC.xian_V) + ',' + str(
-                zsqX.C_half_I) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer)+',' + str(zsqX.alarmid)+','+"\'"+str(zsqX.RTCtime)+"\'"+')'
-        elif zsqX.alarmid==2:
+                zsqX.C_half_I) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(
+                zsqC.timer) + ',' + str(zsqX.alarmid) + ',' + "\'" + str(zsqX.RTCtime) + "\'" + ')'
+        elif zsqX.alarmid == 2:
             sqlstr = 'insert into TB_cycdata  VALUES (2,' + "\'" + str(myservertime) + "\'" + ',' + str(
                 mydtuadd) + ',' + "\'" + str(RTCtime) + "\'" + ',' + str(dtutimer) + ',' + str(mydtu.bat_v) + ',' + str(
                 mydtu.bat_sun) + ',' + str(mydtu.temperature) + ',' + str(mydtu.shidu) + ',' + str(
@@ -804,7 +814,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
                 zsqB.temperature) + ',' + str(
                 zsqB.timer) + ',' + str(zsqC.duanlu) + ',' + str(zsqC.jiedi) + ',' + str(zsqX.C_I) + ',' + str(
                 zsqX.C_E) + ',' + str(zsqC.Li_bat) + ',' + str(zsqC.Sun_bat) + ',' + str(zsqC.xian_V) + ',' + str(
-                zsqX.C_half_I) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer) +',' + str(zsqX.alarmid)+','+"\'"+str(zsqX.RTCtime)+"\'"+')'
+                zsqX.C_half_I) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(
+                zsqC.timer) + ',' + str(zsqX.alarmid) + ',' + "\'" + str(zsqX.RTCtime) + "\'" + ')'
         else:
             sqlstr = 'insert into TB_cycdata  VALUES (2,' + "\'" + str(myservertime) + "\'" + ',' + str(
                 mydtuadd) + ',' + "\'" + str(RTCtime) + "\'" + ',' + str(dtutimer) + ',' + str(mydtu.bat_v) + ',' + str(
@@ -818,11 +829,13 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
                 zsqB.temperature) + ',' + str(
                 zsqB.timer) + ',' + str(zsqX.duanlu) + ',' + str(zsqX.jiedi) + ',' + str(zsqX.C_I) + ',' + str(
                 zsqX.C_E) + ',' + str(zsqC.Li_bat) + ',' + str(zsqC.Sun_bat) + ',' + str(zsqC.xian_V) + ',' + str(
-                zsqX.C_half_I) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(zsqC.timer) +',' + str(zsqX.alarmid)+','+"\'"+str(zsqX.RTCtime)+"\'"+')'
+                zsqX.C_half_I) + ',' + str(zsqC.Gan_bat) + ',' + str(zsqC.temperature) + ',' + str(
+                zsqC.timer) + ',' + str(zsqX.alarmid) + ',' + "\'" + str(zsqX.RTCtime) + "\'" + ')'
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,11,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',2,11,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_I) + ',' + str(
             ac12tA.T2_I) + ',' + str(ac12tA.T3_I) + ',' + str(ac12tA.T4_I) + ',' + str(ac12tA.T5_I) + ',' + str(
             ac12tA.T6_I) + ',' + str(ac12tA.T7_I) + ',' + str(ac12tA.T8_I) + ',' + str(ac12tA.T9_I) + ',' + str(
@@ -830,9 +843,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-
-
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,21,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',2,21,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_I) + ',' + str(
             ac12tB.T2_I) + ',' + str(ac12tB.T3_I) + ',' + str(ac12tB.T4_I) + ',' + str(ac12tB.T5_I) + ',' + str(
             ac12tB.T6_I) + ',' + str(ac12tB.T7_I) + ',' + str(ac12tB.T8_I) + ',' + str(ac12tB.T9_I) + ',' + str(
@@ -840,7 +852,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,31,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',2,31,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_I) + ',' + str(
             ac12tC.T2_I) + ',' + str(ac12tC.T3_I) + ',' + str(ac12tC.T4_I) + ',' + str(ac12tC.T5_I) + ',' + str(
             ac12tC.T6_I) + ',' + str(ac12tC.T7_I) + ',' + str(ac12tC.T8_I) + ',' + str(ac12tC.T9_I) + ',' + str(
@@ -848,7 +861,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,12,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',2,12,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tA.T1_E) + ',' + str(
             ac12tA.T2_E) + ',' + str(ac12tA.T3_E) + ',' + str(ac12tA.T4_E) + ',' + str(ac12tA.T5_E) + ',' + str(
             ac12tA.T6_E) + ',' + str(ac12tA.T7_E) + ',' + str(ac12tA.T8_E) + ',' + str(ac12tA.T9_E) + ',' + str(
@@ -856,7 +870,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,22,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',2,22,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tB.T1_E) + ',' + str(
             ac12tB.T2_E) + ',' + str(ac12tB.T3_E) + ',' + str(ac12tB.T4_E) + ',' + str(ac12tB.T5_E) + ',' + str(
             ac12tB.T6_E) + ',' + str(ac12tB.T7_E) + ',' + str(ac12tB.T8_E) + ',' + str(ac12tB.T9_E) + ',' + str(
@@ -864,9 +879,8 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-
-
-        sqlstr = 'insert into TB_AC12T  VALUES ('+str(mydtuadd)+',2,32,' + "\'" + str(myservertime) + "\'" + ',' + "\'" + str(
+        sqlstr = 'insert into TB_AC12T  VALUES (' + str(mydtuadd) + ',2,32,' + "\'" + str(
+            myservertime) + "\'" + ',' + "\'" + str(
             RTCtime) + "\'" + ',' + str(ac12tC.T1_E) + ',' + str(
             ac12tC.T2_E) + ',' + str(ac12tC.T3_E) + ',' + str(ac12tC.T4_E) + ',' + str(ac12tC.T5_E) + ',' + str(
             ac12tC.T6_E) + ',' + str(ac12tC.T7_E) + ',' + str(ac12tC.T8_E) + ',' + str(ac12tC.T9_E) + ',' + str(
@@ -875,10 +889,11 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
 
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
-        #总召录波文件
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
+        # 总召录波文件
         time.sleep(1)
-        my_str_short = [0X68, 0X0B, 0X0B, 0X68, 0X73, 0X03, 0X00, 0X64, 0X01, 0X6D, 0X03, 0X00, 0X01, 0X45, 0X00, 0XFF,0X16]
+        my_str_short = [0X68, 0X0B, 0X0B, 0X68, 0X73, 0X03, 0X00, 0X64, 0X01, 0X6D, 0X03, 0X00, 0X01, 0X45, 0X00, 0XFF,
+                        0X16]
         my_str_short[5] = my_str_short[10] = dtu_add_Low
         my_str_short[6] = my_str_short[11] = dtu_add_High
         s2 = my_101_com_genert_CRC(my_str_short)
@@ -888,7 +903,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
 
         print("alarm Get File send data_I:", end='')
         my_str_to_hex_display(s3)
-        my_get_file_e_status=1
+        my_get_file_e_status = 1
 
 
 
@@ -898,7 +913,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         pass
     elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x69 and my_str2[
         9] == 0x07 and my_all_step == 7:
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
         my_all_step = 0
         print("rest com finish==")
     # 设定参数1
@@ -931,10 +946,11 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         pass
         my_all_step = 0
         print("Get para finish==")
-    #信号强度
-    elif  my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[9] == 0x6f and  my_inf_add == 0x5060:
-        my_GPRS_dbm=my_str2[14]
-        my_zsq1_dmb=my_str2[17]
+    # 信号强度
+    elif my_str2[0] == 0x68 and (my_str2[4] == 0x53 or my_str2[4] == 0x73) and my_str2[7] == 0x09 and my_str2[
+        9] == 0x6f and my_inf_add == 0x5060:
+        my_GPRS_dbm = my_str2[14]
+        my_zsq1_dmb = my_str2[17]
         my_zsq2_dmb = my_str2[18]
         my_zsq3_dmb = my_str2[19]
         sqlstr = 'insert into TB_dbm  VALUES (\'' + str(mydtuadd) + "\',\'" + str(myservertime) + "\'" + ',' + str(
@@ -942,7 +958,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         print(sqlstr)
         my_fun_SQL_insertdata(sqlstr)
         my_all_step = 0
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
 
     # 文件录波数据#######################################
     elif my_str2[0] == 0x10 and my_str2[1] == 0x00 and my_all_step == 14:
@@ -984,17 +1000,19 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
             if myIEadd == 0x4501 or myIEadd == 0x4601:
                 # print(my_zsq_recdata_buf_I)
                 mydata = (bytes)(my_zsq_recdata_buf_I)
-                my_fun_write_recdata_tofile(mydata,myservertime,mydtuadd)
+                my_fun_write_recdata_tofile(mydata, myservertime, mydtuadd,0)
             else:
                 # print(my_zsq_recdata_buf_E)
                 mydata = (bytes)(my_zsq_recdata_buf_E)
-                my_fun_write_recdata_tofile(mydata,myservertime,mydtuadd)
+                my_fun_write_recdata_tofile(mydata, myservertime, mydtuadd,1)
 
         # 文件写入操作结束
-        if my_get_file_e_status==1:
-            my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x01, 0x45, 0X00, 0XFF,0x16]
+        if my_get_file_e_status == 1:
+            my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x01, 0x45, 0X00,
+                            0XFF, 0x16]
         else:
-            my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x02, 0x45, 0X00,0XFF,0x16]
+            my_str_short = [0x68, 0x0B, 0x0B, 0x68, 0x73, 0x01, 0x00, 0x64, 0x01, 0x73, 0x01, 0x00, 0x02, 0x45, 0X00,
+                            0XFF, 0x16]
         my_str_short[12] = my_inf_add_Low
         my_str_short[13] = my_inf_add_high
         my_str_short[14] = file_count
@@ -1009,7 +1027,7 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
         my_str_to_hex_display(s3)
 
         print("Get File finish==%d" % file_count)
-        if my_get_file_e_status==1 and file_count>=9:
+        if my_get_file_e_status == 1 and file_count >= 9:
             pass
             time.sleep(1)
             my_str_short = [0X68, 0X0B, 0X0B, 0X68, 0X73, 0X03, 0X00, 0X64, 0X01, 0X6D, 0X03, 0X00, 0X02, 0X45, 0X00,
@@ -1023,11 +1041,11 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
 
             print("alarm Get File send data_E:", end='')
             my_str_to_hex_display(s3)
-            my_get_file_e_status=0
+            my_get_file_e_status = 0
 
 
     else:
-        my_fun_send_OK(conn,dtu_add_Low,dtu_add_High)
+        my_fun_send_OK(conn, dtu_add_Low, dtu_add_High)
 
     #########服务器主动发送
     # 时钟同步
@@ -1213,7 +1231,6 @@ def my_fun_work(buf, conn,dtu_add_Low2,dtu_add_High2,my_all_step2,my_heart_time_
     return dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, my_zsq_recdata_buf_pt, my_get_file_e_status
 
 
-
 ##################################################3333
 ##多线程处理函数
 class MyServer(socketserver.BaseRequestHandler):
@@ -1243,19 +1260,16 @@ class MyServer(socketserver.BaseRequestHandler):
 
         my_zsq_recdata_buf_I = [0] * 2000
         my_zsq_recdata_buf_E = [0] * 2000
-        my_zsq_recdata_buf_pt = 0
-        my_get_file_e_status = 0
-
 
 
         while Flag:
             data = conn.recv(1024)
             # print(data)
-            dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, my_zsq_recdata_buf_pt, my_get_file_e_status=my_fun_work(data,conn,dtu_add_Low,dtu_add_High,my_all_step,my_heart_time_count,file_count,zsqA,zsqB,zsqC,zsqX,mydtu,ac12tA,ac12tB,ac12tC,my_zsq_recdata_buf_I,my_zsq_recdata_buf_E,my_zsq_recdata_buf_pt,my_get_file_e_status)
+            dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, my_zsq_recdata_buf_pt, my_get_file_e_status = my_fun_work(data, conn, dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, zsqA, zsqB, zsqC,zsqX, mydtu, ac12tA, ac12tB, ac12tC, my_zsq_recdata_buf_I, my_zsq_recdata_buf_E, my_zsq_recdata_buf_pt,my_get_file_e_status)
 
 
 if __name__ == '__main__':
     server = socketserver.ThreadingTCPServer(('106.14.41.25', 2216), MyServer)  ####20171215
-    #server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
+    # server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
 
     server.serve_forever()
