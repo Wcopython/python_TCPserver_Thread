@@ -146,7 +146,7 @@ def my_fun_SQL_readdata(sqlstr):
     return myredata
 
 
-mygetscrolldata='0'
+
 class mywindow(QtWidgets.QWidget,Ui_Form):
     def __init__(self):
         super(mywindow,self).__init__()
@@ -184,6 +184,8 @@ class mywindow(QtWidgets.QWidget,Ui_Form):
     def bt3_click(self):
         pass
         myid=self.textEdit.toPlainText()
+
+
         print(myid)
 
         mysql1 = "select top 100 * from TB_View_cycdata where dtuid="+str(myid)+" order by ID DESC "

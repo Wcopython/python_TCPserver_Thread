@@ -6,7 +6,7 @@ import pymssql
 import datetime
 import time
 
-
+myconn1=socket.socket()
 def my_fun_write_recdata_tofile(mydata, myservertime2, mydtuadd2,E_status):#E_status表示传递电场数据，1就是电场，0是电流
     mytodattime = datetime.datetime.now()
     myEID=(int)(E_status)
@@ -1233,10 +1233,19 @@ def my_fun_work(buf, conn, dtu_add_Low2, dtu_add_High2, my_all_step2, my_heart_t
 
 ##################################################3333
 ##多线程处理函数
+
 class MyServer(socketserver.BaseRequestHandler):
     def handle(self):
+        global myconn1
         conn = self.request
-        myls = bytes((0x01, 0x02, 0x03))
+        myconn1=conn
+        print(type(conn))
+        print(conn)
+        print(type(myconn1))
+        print(myconn1)
+        myls = bytes((0x31, 0x32, 0x33))
+        myconn1.sendall(myls)
+        myls = bytes((0x61, 0x62, 0x63))
         conn.sendall(myls)
         Flag = True
 
@@ -1264,12 +1273,20 @@ class MyServer(socketserver.BaseRequestHandler):
 
         while Flag:
             data = conn.recv(1024)
-            # print(data)
+            print(data)
+            if data[0]!=0x10 or data[0]!=0x68:
+                continue
             dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, my_zsq_recdata_buf_pt, my_get_file_e_status = my_fun_work(data, conn, dtu_add_Low, dtu_add_High, my_all_step, my_heart_time_count, file_count, zsqA, zsqB, zsqC,zsqX, mydtu, ac12tA, ac12tB, ac12tC, my_zsq_recdata_buf_I, my_zsq_recdata_buf_E, my_zsq_recdata_buf_pt,my_get_file_e_status)
 
-
+i=1
 if __name__ == '__main__':
-    server = socketserver.ThreadingTCPServer(('106.14.41.25', 2216), MyServer)  ####20171215
-    # server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
-
+    #server = socketserver.ThreadingTCPServer(('106.14.41.25', 2216), MyServer)  ####20171215
+    server = socketserver.ThreadingTCPServer(('127.0.0.1', 2216), MyServer)
+    i=i+1
+    print(i)
     server.serve_forever()
+    myls = bytes((0x34, 0x35, 0x36))
+    myconn1.sendall(myls)
+
+
+

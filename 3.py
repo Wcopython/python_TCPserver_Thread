@@ -1,6 +1,8 @@
 import pymssql
 import re
-import pandas
+
+import pandas as pd
+from pandas import Series,DataFrame
 
 
 class MSSQL:
@@ -103,6 +105,8 @@ def main():
             t0.append(t3)
 
             xx_word12.append(t0)
+        else:
+            print(str(yy),t1,t2,t3)
 
 ##################################
     for yy in range(0,len(xx_word20)):
@@ -121,6 +125,8 @@ def main():
             #t0.append(t2)
             t0.append(t3)
             xx_word22.append(t0)
+        else:
+            print(str(yy),t1,t2,t3)
 
 
     for yy in range(0,len(xx_excel1)):
@@ -140,7 +146,9 @@ def main():
             #t0.append(t2)
             t0.append(t3)
             xx_excel2.append(t0)
-            #print(t0)
+        else:
+            print(str(yy), t1, t2, t3)
+
     for yy in range(0,len(xx_ppt1)):
 
         t1 = re.findall(r"第\d+套",str(xx_ppt1[yy]))
@@ -158,6 +166,8 @@ def main():
             #t0.append(t2)
             t0.append(t3)
             xx_ppt2.append(t0)
+        else:
+            print(str(yy),t1,t2,t3)
 
     for yy in range(0,len(xx_windows1)):
 
@@ -176,7 +186,10 @@ def main():
             #t0.append(t2)
             t0.append(t3)
             xx_windows2.append(t0)
+        else:
+            print(str(yy),t1,t2,t3)
 
+    print('###############################3')
     print(xx_select2[100])
     print(xx_word12[100])
     print(xx_word22[100])
@@ -185,10 +198,25 @@ def main():
     print(xx_windows2[100])
 
 ############################
-    print("#########################")
-    print(xx_word12)
+    print("############pandas##########")
+    #print(xx_word12)
+
+#########pandas#############################
+    yy0=[]
+    yy1=[]
+    yy2=[]
+    for i in range(0,len(xx_select2)):
+        yy0.append(xx_select2[i][0])
+        yy1.append(xx_select2[i][1])
+        yy2.append(int(xx_select2[i][2]))
+
+    xx2={'select':yy0,'select_num':yy1,'value':yy2}
+    mydata=DataFrame(xx2)
+    print(mydata)
+    print(mydata.groupby(['select','select_num']).mean())
 
 
+    
 
 
 main()
